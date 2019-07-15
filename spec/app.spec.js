@@ -19,7 +19,17 @@ describe('API testing', () => {
             'slug',
             'description'
           )
-        })
-    })
-  })
-})
+        });
+    });
+  });
+  describe('ERROR/not-a-route', () => {
+    it('gives a 404 erorr and "Route not found" when using a route that does not exist', () => {
+      return request(app)
+        .get("/api/not-a-route")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("Route not found");
+        });
+    });
+  });
+});

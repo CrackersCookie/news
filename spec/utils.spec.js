@@ -54,6 +54,24 @@ describe('formatDates', () => {
     }];
     expect(formatDates(list)).to.eql(expected);
   })
+  it('does not alter the initial data it is passed', () => {
+    const list = [{
+      title: 'A',
+      topic: 'mitch',
+      author: 'icellusedkars',
+      body: 'Delicious tin of cat food',
+      created_at: 911564514171,
+    }];
+    const baseList = [{
+      title: 'A',
+      topic: 'mitch',
+      author: 'icellusedkars',
+      body: 'Delicious tin of cat food',
+      created_at: 911564514171,
+    }]
+    formatDates(list)
+    expect(list).to.eql(baseList);
+  })
 });
 
 describe('makeRefObj', () => { });

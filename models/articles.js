@@ -71,11 +71,12 @@ const insertCommentByArticleID = ({ article_id }, reqBody) => {
   }
 };
 
-const selectCommentsByArticleID = ({ article_id }) => {
+const selectCommentsByArticleID = ({ article_id }, { sort_by, order }) => {
   return connection
     .select("comment_id", "votes", "created_at", "author", "body")
     .from("comments")
-    .where({ article_id });
+    .where({ article_id })
+    .orderBy(sort_by || "created_at", order || "desc");
 };
 
 module.exports = {

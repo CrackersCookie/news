@@ -31,7 +31,7 @@ const postCommentByArticleID = (req, res, next) => {
 };
 
 const sendCommentsByArticleID = (req, res, next) => {
-  selectCommentsByArticleID(req.params).then(comments => {
+  selectCommentsByArticleID(req.params, req.query).then(comments => {
     res.status(200).send({ comments });
   });
 };

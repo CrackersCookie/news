@@ -1,5 +1,8 @@
 process.env.NODE_ENV = "test";
-const { expect } = require("chai");
+const chai = require("chai");
+const chaiSorted = require("chai-sorted");
+chai.use(chaiSorted);
+const { expect } = chai;
 const request = require("supertest");
 const connection = require("../db/connection.js");
 const app = require("../app.js");
@@ -310,6 +313,38 @@ describe("API testing", () => {
             "author",
             "body"
           );
+        });
+    });
+    it("returns a 200 and sorts the results using a sort_by query", () => {
+      return request(app)
+        .get("/api/articles/1/comments?sort_by=votes")
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          expect(comments).to.be.descendingBy("votes");
+        });
+    });
+    it("returns a 200 and sorts the results by created_at by default", () => {
+      return request(app)
+        .get("/api/articles/1/comments")
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          expect(comments).to.be.descendingBy("created_at");
+        });
+    });
+    it("returns a 200 and sorts the results in ascending order when the order query is specified ", () => {
+      return request(app)
+        .get("/api/articles/1/comments?order=asc")
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          expect(comments).to.be.ascendingBy("created_at");
+        });
+    });
+    it("returns a 200 and sorts the results in descending order by default", () => {
+      return request(app)
+        .get("/api/articles/1/comments")
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          expect(comments).to.be.descendingBy("created_at");
         });
     });
   });

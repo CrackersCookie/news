@@ -21,14 +21,25 @@ describe('API testing', () => {
           )
         });
     });
+    it('gives a 405 status and "Method Not Allowed" when attempting to post, patch or delete topics', () => {
+      const invalidMethods = ['patch', 'put', 'delete'];
+      const methodPromises = invalidMethods.map((method) => {
+        return request(app)[method]('/api/topics')
+          .expect(405)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal('Method Not Allowed');
+          });
+      });
+      return Promise.all(methodPromises);
+    });
   });
   describe('ERROR/not-a-route', () => {
-    it('gives a 404 erorr and "Route not found" when using a route that does not exist', () => {
+    it('gives a 404 erorr and "Route Not Found" when using a route that does not exist', () => {
       return request(app)
         .get("/api/not-a-route")
         .expect(404)
         .then(({ body }) => {
-          expect(body.msg).to.equal("Route not found");
+          expect(body.msg).to.equal("Route Not Found");
         });
     });
   });

@@ -1,7 +1,10 @@
 const articlesRouter = require('express').Router();
-const { sendArticleByID } = require('../controllers/articles');
+const { sendArticleByID, editArticleByID } = require('../controllers/articles');
 const { methodNotFound } = require('../errors/errors');
 
-articlesRouter.route('/:article_id').get(sendArticleByID).all(methodNotFound)
+articlesRouter.route('/:article_id')
+  .get(sendArticleByID)
+  .patch(editArticleByID)
+  .all(methodNotFound)
 
 module.exports = articlesRouter

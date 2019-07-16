@@ -120,6 +120,44 @@ describe('API testing', () => {
         });
     });
   });
+  describe('PATCH /api/articles/:article_id', () => {
+    it('returns a status 200 when patched with an object with a "inc_votes" key with a positive value and increases the number of votes on an article by that number - returning the updated article', () => {
+      return request(app)
+        .patch('/api/articles/1')
+        .send({ inc_votes: 1 })
+        .expect(200)
+        .then(({ body: { article } }) => {
+          expect(article.votes).to.equal(101)
+          expect(article).to.have.keys(
+            'author',
+            'title',
+            'article_id',
+            'body',
+            'topic',
+            'created_at',
+            'votes'
+          );
+        });
+    });
+    it('returns a status 200 when patched with an object with a "inc_votes" key with a negative value and decreases the number of votes on an article by that number', () => {
+      return request(app)
+        .patch('/api/articles/1')
+        .send({ inc_votes: -1 })
+        .expect(200)
+        .then(({ body: { article: { votes } } }) => {
+          expect(votes).to.equal(99)
+        });
+    });
+    it('returns a status 400 when sent an empty request body with no "inc_votes" value on it', () => {
+      return request(app)
+        .patch('/api/articles/1')
+        .send({})
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal('Bad Request - inc_votes missing from request body')
+        });
+    });
+  });
   describe('ERROR/not-a-route', () => {
     it('gives a 404 erorr and "Route Not Found" when using a route that does not exist', () => {
       return request(app)

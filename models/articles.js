@@ -20,4 +20,18 @@ const selectArticleByID = ({ article_id }) => {
     })
 }
 
-module.exports = { selectArticleByID }
+const updateArticleVotesByID = ({ article_id }, { inc_votes }) => {
+  if (!inc_votes) return Promise.reject({ status: 400, msg: 'Bad Request - inc_votes missing from request body' })
+  console.log(article_id, inc_votes)
+  const votes = inc_votes
+  return connection
+    .from('articles')
+    .where({ article_id })
+    .increment({ votes })
+    .returning('*').then((article) => {
+      return article[0]
+    })
+
+}
+
+module.exports = { selectArticleByID, updateArticleVotesByID }

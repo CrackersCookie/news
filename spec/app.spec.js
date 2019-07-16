@@ -33,6 +33,9 @@ describe('API testing', () => {
       return Promise.all(methodPromises);
     });
   });
+  describe('GET/api/topics/:username', () => {
+
+  });
   describe('ERROR/not-a-route', () => {
     it('gives a 404 erorr and "Route Not Found" when using a route that does not exist', () => {
       return request(app)

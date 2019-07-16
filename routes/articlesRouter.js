@@ -1,12 +1,22 @@
-const articlesRouter = require('express').Router();
-const { sendArticleByID, editArticleByID, postCommentByArticleID } = require('../controllers/articles');
-const { methodNotFound } = require('../errors/errors');
+const articlesRouter = require("express").Router();
+const {
+  sendArticleByID,
+  editArticleByID,
+  postCommentByArticleID,
+  sendCommentsByArticleID
+} = require("../controllers/articles");
+const { methodNotFound } = require("../errors/errors");
 
-articlesRouter.route('/:article_id')
+articlesRouter
+  .route("/:article_id")
   .get(sendArticleByID)
   .patch(editArticleByID)
-  .all(methodNotFound)
+  .all(methodNotFound);
 
-articlesRouter.route('/:article_id/comments').post(postCommentByArticleID).all(methodNotFound)
+articlesRouter
+  .route("/:article_id/comments")
+  .post(postCommentByArticleID)
+  .get(sendCommentsByArticleID)
+  .all(methodNotFound);
 
-module.exports = articlesRouter
+module.exports = articlesRouter;

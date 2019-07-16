@@ -9,7 +9,6 @@ const sendArticleByID = (req, res, next) => {
 const editArticleByID = (req, res, next) => {
   const { params, body } = req
   updateArticleVotesByID(params, body).then((article) => {
-    console.log(article)
     res.status(200).send({ article })
   }).catch(next)
 }

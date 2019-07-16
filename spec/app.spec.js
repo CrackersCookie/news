@@ -148,13 +148,49 @@ describe('API testing', () => {
           expect(votes).to.equal(99)
         });
     });
-    it('returns a status 400 when sent an empty request body with no "inc_votes" value on it', () => {
+    it('ERROR returns a status 400 when sent an empty request body with no "inc_votes" value on it', () => {
       return request(app)
         .patch('/api/articles/1')
         .send({})
         .expect(400)
         .then(({ body: { msg } }) => {
           expect(msg).to.equal('Bad Request - inc_votes missing from request body')
+        });
+    });
+    it('ERROR returns a status 400 when sent a patch with an invalid "inc_votes" value', () => {
+      return request(app)
+        .patch('/api/articles/1')
+        .send({ inc_votes: 'string-not-an-integer' })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal('invalid input syntax for integer: "NaN"')
+        });
+    });
+    it('ERROR returns a status 400 when sent a patch with additional keys', () => {
+      return request(app)
+        .patch('/api/articles/1')
+        .send({ inc_votes: 1, more_votes: 3 })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal('Bad Request - must only contain inc_votes values')
+        });
+    });
+    it('ERROR returns a status 404 error when the article_id is not found', () => {
+      return request(app)
+        .patch('/api/articles/9999')
+        .send({ inc_votes: 1 })
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal('Article Not Found')
+        });
+    });
+    it('ERROR returns a status 400 error when the article_id is not found', () => {
+      return request(app)
+        .patch('/api/articles/string-not-an-integer')
+        .send({ inc_votes: 1 })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal('invalid input syntax for integer: "string-not-an-integer"')
         });
     });
   });

@@ -33,8 +33,19 @@ describe('API testing', () => {
       return Promise.all(methodPromises);
     });
   });
-  describe('GET/api/topics/:username', () => {
-
+  describe('GET/api/users/:username', () => {
+    it('returns a status 200 and the user data when a valid username is requested', () => {
+      return request(app)
+        .get('/api/users/icellusedkars')
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.user).to.have.keys(
+            'username',
+            'avatar_url',
+            'name'
+          )
+        });
+    });
   });
   describe('ERROR/not-a-route', () => {
     it('gives a 404 erorr and "Route Not Found" when using a route that does not exist', () => {

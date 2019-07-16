@@ -39,14 +39,20 @@ const updateArticleVotesByID = ({ article_id }, body) => {
   }
 }
 
-const insertCommentByArticleID = ({ article_id }, { username, body }) => {
-  const author = username;
-  return connection
-    .insert({ author, body, article_id })
-    .into('comments')
-    .returning('*')
-    .then((comment) => comment[0])
-
+const insertCommentByArticleID = ({ article_id }, reqBody) => {
+  const { username, body } = reqBody
+  if (!body || !body.length || !username) {
+    return Promise.reject({ status: 400, msg: 'Bad Request - username and body required' })
+  }
+  else if (Object.keys(reqBody).length > 2) return Promise.reject({ status: 400, msg: 'Bad Request - Invalid key supplied' })
+  else {
+    const author = username;
+    return connection
+      .insert({ author, body, article_id })
+      .into('comments')
+      .returning('*')
+      .then((comment) => comment[0])
+  }
 }
 
 module.exports = { selectArticleByID, updateArticleVotesByID, insertCommentByArticleID }

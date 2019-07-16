@@ -7,6 +7,6 @@ articlesRouter.route('/:article_id')
   .patch(editArticleByID)
   .all(methodNotFound)
 
-articlesRouter.route('/:article_id/comments').post(postCommentByArticleID)
+articlesRouter.route('/:article_id/comments').post(postCommentByArticleID).all(methodNotFound)
 
 module.exports = articlesRouter

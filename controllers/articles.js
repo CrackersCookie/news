@@ -16,7 +16,7 @@ const postCommentByArticleID = (req, res, next) => {
   const { params, body } = req
   insertCommentByArticleID(params, body).then((comment) => {
     res.status(201).send({ comment })
-  })
+  }).catch(next)
 }
 
 module.exports = { sendArticleByID, editArticleByID, postCommentByArticleID }

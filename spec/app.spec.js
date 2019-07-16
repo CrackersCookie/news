@@ -211,6 +211,80 @@ describe('API testing', () => {
           );
         });
     });
+    it('ERROR - returns a status 404 when artilce_id is not found', () => {
+      return request(app)
+        .post('/api/articles/9999/comments')
+        .send({ username: 'butter_bridge', body: 'clever comment goes here' })
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal('Not Found')
+        })
+    });
+    it('ERROR - returns a status 400 when artilce_id is in an invalid format', () => {
+      return request(app)
+        .post('/api/articles/string-not-an-integer/comments')
+        .send({ username: 'butter_bridge', body: 'clever comment goes here' })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal('invalid input syntax for integer: "string-not-an-integer"')
+        })
+    });
+    it('ERROR - returns a status 404 when username is not found', () => {
+      return request(app)
+        .post('/api/articles/1/comments')
+        .send({ username: 'butter_bridges', body: 'clever comment goes here' })
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal('Not Found')
+        })
+    });
+    it('ERROR - returns a status 400 when the body of the comment is left blank is not found', () => {
+      return request(app)
+        .post('/api/articles/1/comments')
+        .send({ username: 'butter_bridge', body: '' })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal('Bad Request - username and body required')
+        })
+    });
+    it('ERROR - returns a status 400 when the username is not supplied', () => {
+      return request(app)
+        .post('/api/articles/1/comments')
+        .send({ body: 'Test' })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal('Bad Request - username and body required')
+        })
+    });
+    it('ERROR - returns a status 400 when the comment body is not supplied', () => {
+      return request(app)
+        .post('/api/articles/1/comments')
+        .send({ username: 'butter_bridge' })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal('Bad Request - username and body required')
+        })
+    });
+    it('ERROR - returns a status 404 when additional data is provided on additional keys', () => {
+      return request(app)
+        .post('/api/articles/1/comments')
+        .send({ username: 'butter_bridge', body: 'clever comment goes here', password: 'some-string' })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal('Bad Request - Invalid key supplied')
+        })
+    });
+    it('ERROR - gives a 405 status and "Method Not Allowed" when attempting to patch, put or delete comments', () => {
+      const invalidMethods = ['patch', 'put', 'delete'];
+      const methodPromises = invalidMethods.map((method) => {
+        return request(app)[method]('/api/articles/1/comments')
+          .expect(405)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal('Method Not Allowed');
+          });
+      });
+      return Promise.all(methodPromises);
+    });
   });
   describe('ERROR/not-a-route', () => {
     it('gives a 404 erorr and "Route Not Found" when using a route that does not exist', () => {

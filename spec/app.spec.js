@@ -347,6 +347,48 @@ describe("API testing", () => {
           expect(comments).to.be.descendingBy("created_at");
         });
     });
+    it("ERROR - returns a 404 and article not found message when passed an article_id that does not exist", () => {
+      return request(app)
+        .get("/api/articles/9999/comments")
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal("Article or Comments Not Found");
+        });
+    });
+    it("ERROR - returns a 400 and Bad Request message when passed an article_id that is invalid", () => {
+      return request(app)
+        .get("/api/articles/string-not-an-integer/comments")
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal(
+            'invalid input syntax for integer: "string-not-an-integer"'
+          );
+        });
+    });
+    it("ERROR - returns a 404 and Not Found message when passed an article_id that has no comments but is valid", () => {
+      return request(app)
+        .get("/api/articles/10/comments")
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal("Article or Comments Not Found");
+        });
+    });
+  });
+  it("ERROR - returns a 400 error when sorted by an invalid column", () => {
+    return request(app)
+      .get("/api/articles/1/comments?sort_by=invalid-column")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).to.equal('column "invalid-column" does not exist');
+      });
+  });
+  it("ERROR - returns a 400 error when ordered by an invalid value", () => {
+    return request(app)
+      .get("/api/articles/1/comments?order=invaid-input")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).to.equal("Invalid sort order");
+      });
   });
   describe("ERROR/not-a-route", () => {
     it('gives a 404 erorr and "Route Not Found" when using a route that does not exist', () => {

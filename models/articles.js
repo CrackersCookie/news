@@ -71,12 +71,30 @@ const insertCommentByArticleID = ({ article_id }, reqBody) => {
   }
 };
 
-const selectCommentsByArticleID = ({ article_id }, { sort_by, order }) => {
-  return connection
-    .select("comment_id", "votes", "created_at", "author", "body")
-    .from("comments")
-    .where({ article_id })
-    .orderBy(sort_by || "created_at", order || "desc");
+const selectCommentsByArticleID = (
+  { article_id },
+  { sort_by, order = "desc" }
+) => {
+  if (order === "asc" || order === "desc") {
+    return connection
+      .select("comment_id", "votes", "created_at", "author", "body")
+      .from("comments")
+      .where({ article_id })
+      .orderBy(sort_by || "created_at", order)
+      .then(comments => {
+        if (!comments.length) {
+          return Promise.reject({
+            status: 404,
+            msg: "Article or Comments Not Found"
+          });
+        } else return comments;
+      });
+  } else {
+    return Promise.reject({
+      status: 400,
+      msg: "Invalid sort order"
+    });
+  }
 };
 
 module.exports = {

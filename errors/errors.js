@@ -12,8 +12,11 @@ exports.customErrors = (err, req, res, next) => {
 };
 
 exports.sqlErrors = (err, req, res, next) => {
-  // console.log(err)
+  // console.log(err);
   if (err.code === "22P02") {
+    res.status(400).send({ msg: err.message.split(" - ")[1] });
+  }
+  if (err.code === "42703") {
     res.status(400).send({ msg: err.message.split(" - ")[1] });
   }
   if (err.code === "23503") {

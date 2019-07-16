@@ -46,15 +46,53 @@ describe('API testing', () => {
           )
         });
     });
-  });
-  describe('ERROR/not-a-route', () => {
-    it('gives a 404 erorr and "Route Not Found" when using a route that does not exist', () => {
+    it('returns a status 404 and a message indicating the user was not found when an invalid username is requested', () => {
       return request(app)
-        .get("/api/not-a-route")
+        .get('/api/users/not-valid-user')
         .expect(404)
-        .then(({ body }) => {
-          expect(body.msg).to.equal("Route Not Found");
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal('User Not Found')
         });
+    });
+    it('gives a 405 status and "Method Not Allowed" when attempting to post, patch or delete users by username', () => {
+      const invalidMethods = ['patch', 'put', 'delete'];
+      const methodPromises = invalidMethods.map((method) => {
+        return request(app)[method]('/api/users/5')
+          .expect(405)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal('Method Not Allowed');
+          });
+      });
+      return Promise.all(methodPromises);
+    });
+  });
+  describe('GET /api/articles/:article_id', () => {
+    it('returns a 200 status and article data when passed a valid artcile_id', () => {
+      return request(app)
+        .get('/api/articles/10')
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.user).to.have.keys(
+            'author',
+            'title',
+            'article_id',
+            'body',
+            'topic',
+            'created_by',
+            'votes',
+            'comment_count'
+          )
+        });
+    });
+    describe('ERROR/not-a-route', () => {
+      it('gives a 404 erorr and "Route Not Found" when using a route that does not exist', () => {
+        return request(app)
+          .get("/api/not-a-route")
+          .expect(404)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal("Route Not Found");
+          });
+      });
     });
   });
 });

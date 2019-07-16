@@ -21,7 +21,7 @@ describe('API testing', () => {
           )
         });
     });
-    it('gives a 405 status and "Method Not Allowed" when attempting to post, patch or delete topics', () => {
+    it('ERROR - gives a 405 status and "Method Not Allowed" when attempting to post, patch or delete topics', () => {
       const invalidMethods = ['patch', 'put', 'delete'];
       const methodPromises = invalidMethods.map((method) => {
         return request(app)[method]('/api/topics')
@@ -38,15 +38,15 @@ describe('API testing', () => {
       return request(app)
         .get('/api/users/icellusedkars')
         .expect(200)
-        .then(({ body }) => {
-          expect(body.user).to.have.keys(
+        .then(({ body: { user } }) => {
+          expect(user).to.have.keys(
             'username',
             'avatar_url',
             'name'
           )
         });
     });
-    it('returns a status 404 and a message indicating the user was not found when an invalid username is requested', () => {
+    it('ERROR - returns a status 404 and a message indicating the user was not found when an invalid username is requested', () => {
       return request(app)
         .get('/api/users/not-valid-user')
         .expect(404)
@@ -54,7 +54,7 @@ describe('API testing', () => {
           expect(msg).to.equal('User Not Found')
         });
     });
-    it('gives a 405 status and "Method Not Allowed" when attempting to post, patch or delete users by username', () => {
+    it('ERROR - gives a 405 status and "Method Not Allowed" when attempting to post, patch or delete users by username', () => {
       const invalidMethods = ['patch', 'put', 'delete'];
       const methodPromises = invalidMethods.map((method) => {
         return request(app)[method]('/api/users/5')
@@ -69,19 +69,27 @@ describe('API testing', () => {
   describe('GET /api/articles/:article_id', () => {
     it('returns a 200 status and article data when passed a valid artcile_id', () => {
       return request(app)
-        .get('/api/articles/10')
+        .get('/api/articles/1')
         .expect(200)
-        .then(({ body }) => {
-          expect(body.user).to.have.keys(
+        .then(({ body: { article } }) => {
+          expect(article).to.have.keys(
             'author',
             'title',
             'article_id',
             'body',
             'topic',
-            'created_by',
+            'created_at',
             'votes',
             'comment_count'
           )
+        });
+    });
+    it('returns a 200 status and article data when passed a valid artcile_id for an article with no comments', () => {
+      return request(app)
+        .get('/api/articles/2')
+        .expect(200)
+        .then(({ body: { article } }) => {
+          expect(article.comment_count).to.equal(0)
         });
     });
     describe('ERROR/not-a-route', () => {

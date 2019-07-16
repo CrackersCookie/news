@@ -67,7 +67,7 @@ describe('API testing', () => {
     });
   });
   describe('GET /api/articles/:article_id', () => {
-    it('returns a 200 status and article data when passed a valid artcile_id', () => {
+    it('GET returns a 200 status and article data when passed a valid artcile_id', () => {
       return request(app)
         .get('/api/articles/1')
         .expect(200)
@@ -84,7 +84,7 @@ describe('API testing', () => {
           )
         });
     });
-    it('returns a 200 status and article data when passed a valid artcile_id for an article with no comments', () => {
+    it('GET returns a 200 status and article data when passed a valid artcile_id for an article with no comments', () => {
       return request(app)
         .get('/api/articles/2')
         .expect(200)
@@ -92,15 +92,42 @@ describe('API testing', () => {
           expect(article.comment_count).to.equal(0)
         });
     });
-    describe('ERROR/not-a-route', () => {
-      it('gives a 404 erorr and "Route Not Found" when using a route that does not exist', () => {
-        return request(app)
-          .get("/api/not-a-route")
-          .expect(404)
+    it('ERROR - gives a 405 status and "Method Not Allowed" when attempting to post or delete articles by article_id', () => {
+      const invalidMethods = ['post', 'delete'];
+      const methodPromises = invalidMethods.map((method) => {
+        return request(app)[method]('/api/articles/34')
+          .expect(405)
           .then(({ body: { msg } }) => {
-            expect(msg).to.equal("Route Not Found");
+            expect(msg).to.equal('Method Not Allowed');
           });
       });
+      return Promise.all(methodPromises);
+    });
+    it('ERROR / GET it returns a status 400 and a "bad Request" message when passed an article_id in the wrong format', () => {
+      return request(app)
+        .get('/api/articles/string-not-an-integer')
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal('invalid input syntax for integer: "string-not-an-integer"')
+        });
+    });
+    it('ERROR / GET it returns a status 404 and a "Article Not Found" message when passed an article_id that does not exist in the database', () => {
+      return request(app)
+        .get('/api/articles/9999')
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal('Article Not Found')
+        });
+    });
+  });
+  describe('ERROR/not-a-route', () => {
+    it('gives a 404 erorr and "Route Not Found" when using a route that does not exist', () => {
+      return request(app)
+        .get("/api/not-a-route")
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal("Route Not Found");
+        });
     });
   });
 });

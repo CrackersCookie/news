@@ -23,11 +23,7 @@ formatComments = (comments, articleRef) => {
 
   return formattedData.map(comment => {
     const { created_by, belongs_to, ...restOfKeys } = comment
-    return {
-      author: created_by,
-      article_id: articleRef[belongs_to],
-      ...restOfKeys
-    };
+    return { author: created_by, article_id: articleRef[belongs_to], ...restOfKeys };
   })
 };
 

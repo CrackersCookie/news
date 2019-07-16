@@ -1,4 +1,4 @@
-const { selectArticleByID, updateArticleVotesByID } = require('../models/articles')
+const { selectArticleByID, updateArticleVotesByID, insertCommentByArticleID } = require('../models/articles')
 
 const sendArticleByID = (req, res, next) => {
   selectArticleByID(req.params).then((article) => {
@@ -12,5 +12,11 @@ const editArticleByID = (req, res, next) => {
     res.status(200).send({ article })
   }).catch(next)
 }
+const postCommentByArticleID = (req, res, next) => {
+  const { params, body } = req
+  insertCommentByArticleID(params, body).then((comment) => {
+    res.status(201).send({ comment })
+  })
+}
 
-module.exports = { sendArticleByID, editArticleByID }
+module.exports = { sendArticleByID, editArticleByID, postCommentByArticleID }

@@ -194,6 +194,24 @@ describe('API testing', () => {
         });
     });
   });
+  describe.only('POST /api/articles/:article_id/comments', () => {
+    it('returns a status 201 when posting a new comment, returns the posted comment', () => {
+      return request(app)
+        .post('/api/articles/1/comments')
+        .send({ username: 'butter_bridge', body: 'clever comment goes here' })
+        .expect(201)
+        .then(({ body: { comment } }) => {
+          expect(comment).to.have.keys(
+            'comment_id',
+            'author',
+            'article_id',
+            'body',
+            'created_at',
+            'votes'
+          );
+        });
+    });
+  });
   describe('ERROR/not-a-route', () => {
     it('gives a 404 erorr and "Route Not Found" when using a route that does not exist', () => {
       return request(app)

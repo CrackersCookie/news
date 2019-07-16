@@ -39,4 +39,14 @@ const updateArticleVotesByID = ({ article_id }, body) => {
   }
 }
 
-module.exports = { selectArticleByID, updateArticleVotesByID }
+const insertCommentByArticleID = ({ article_id }, { username, body }) => {
+  const author = username;
+  return connection
+    .insert({ author, body, article_id })
+    .into('comments')
+    .returning('*')
+    .then((comment) => comment[0])
+
+}
+
+module.exports = { selectArticleByID, updateArticleVotesByID, insertCommentByArticleID }

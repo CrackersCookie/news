@@ -199,7 +199,7 @@ describe("API testing", () => {
           expect(msg).to.equal("Article Not Found");
         });
     });
-    it("ERROR returns a status 400 error when the article_id is not found", () => {
+    it("ERROR returns a status 400 error when the article_id is in an invalid format", () => {
       return request(app)
         .patch("/api/articles/string-not-an-integer")
         .send({ inc_votes: 1 })
@@ -526,9 +526,9 @@ describe("API testing", () => {
         .patch("/api/comments/1")
         .send({ inc_votes: 10 })
         .expect(200)
-        .then(({ body: { article } }) => {
-          expect(article.votes).to.equal(26);
-          expect(article).to.have.keys(
+        .then(({ body: { comment } }) => {
+          expect(comment.votes).to.equal(26);
+          expect(comment).to.have.keys(
             "comment_id",
             "author",
             "article_id",
@@ -538,15 +538,76 @@ describe("API testing", () => {
           );
         });
     });
-    // it('returns a status 200 when patched with an object with a "inc_votes" key with a negative value and decreases the number of votes on an article by that number', () => {
-    //   return request(app)
-    //     .patch("/api/articles/1")
-    //     .send({ inc_votes: -1 })
-    //     .expect(200)
-    //     .then(({ body: { article: { votes } } }) => {
-    //       expect(votes).to.equal(99);
-    //     });
-    // });
+    it('returns a status 200 when patched with an object with a "inc_votes" key with a negative value and decreases the number of votes on an article by that number', () => {
+      return request(app)
+        .patch("/api/comments/1")
+        .send({ inc_votes: -10 })
+        .expect(200)
+        .then(({ body: { comment: { votes } } }) => {
+          expect(votes).to.equal(6);
+        });
+    });
+    it('ERROR returns a status 400 when sent an empty request body with no "inc_votes" value on it', () => {
+      return request(app)
+        .patch("/api/comments/1")
+        .send({})
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal(
+            "Bad Request - inc_votes missing from request body"
+          );
+        });
+    });
+    it('ERROR returns a status 400 when sent a patch with an invalid "inc_votes" value', () => {
+      return request(app)
+        .patch("/api/comments/1")
+        .send({ inc_votes: "string-not-an-integer" })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal('invalid input syntax for integer: "NaN"');
+        });
+    });
+    it("ERROR returns a status 400 when sent a patch with additional keys", () => {
+      return request(app)
+        .patch("/api/comments/1")
+        .send({ inc_votes: 1, more_votes: 3 })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal(
+            "Bad Request - must only contain inc_votes values"
+          );
+        });
+    });
+    it("ERROR returns a status 400 when no body is sent", () => {
+      return request(app)
+        .patch("/api/comments/1")
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal(
+            "Bad Request - inc_votes missing from request body"
+          );
+        });
+    });
+    it("ERROR returns a status 400 error when the article_id is in an invalid format", () => {
+      return request(app)
+        .patch("/api/comments/string-not-an-integer")
+        .send({ inc_votes: 1 })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal(
+            'invalid input syntax for integer: "string-not-an-integer"'
+          );
+        });
+    });
+    it("ERROR returns a status 404 error when the article_id is not found", () => {
+      return request(app)
+        .patch("/api/comments/9999")
+        .send({ inc_votes: 1 })
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal("Article Not Found");
+        });
+    });
   });
   describe("ERROR/not-a-route", () => {
     it('gives a 404 erorr and "Route Not Found" when using a route that does not exist', () => {

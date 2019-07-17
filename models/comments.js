@@ -2,7 +2,7 @@ const connection = require("../db/connection");
 
 const insertCommentByArticleID = ({ article_id }, reqBody) => {
   const { username, body } = reqBody;
-  if (!body || !body.length || !username)
+  if (!reqBody)
     return Promise.reject({ status: 400, msg: "Bad Request - username and body required" });
   else if (Object.keys(reqBody).length > 2) return Promise.reject({ status: 400, msg: "Bad Request - Invalid key supplied" });
   else {

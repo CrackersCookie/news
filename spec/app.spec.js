@@ -266,22 +266,22 @@ describe("API testing", () => {
             expect(msg).to.equal("Not Found");
           });
       });
-      it("ERROR - returns a status 400 when the body of the comment is left blank is not found", () => {
-        return request(app)
-          .post("/api/articles/1/comments")
-          .send({ username: "butter_bridge", body: "" })
-          .expect(400)
-          .then(({ body: { msg } }) => {
-            expect(msg).to.equal("Bad Request - username and body required");
-          });
-      });
       it("ERROR - returns a status 400 when the username is not supplied", () => {
         return request(app)
           .post("/api/articles/1/comments")
           .send({ body: "Test" })
           .expect(400)
           .then(({ body: { msg } }) => {
-            expect(msg).to.equal("Bad Request - username and body required");
+            expect(msg).to.equal('null value in column "author" violates not-null constraint');
+          });
+      });
+      it("ERROR - returns a status 400 when the username key is not correct", () => {
+        return request(app)
+          .post("/api/articles/1/comments")
+          .send({ user: "butter_bridge", body: "Test" })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal('null value in column "author" violates not-null constraint');
           });
       });
       it("ERROR - returns a status 400 when the comment body is not supplied", () => {
@@ -290,7 +290,7 @@ describe("API testing", () => {
           .send({ username: "butter_bridge" })
           .expect(400)
           .then(({ body: { msg } }) => {
-            expect(msg).to.equal("Bad Request - username and body required");
+            expect(msg).to.equal('null value in column "body" violates not-null constraint');
           });
       });
       it("ERROR - returns a status 404 when additional data is provided on additional keys", () => {
@@ -311,7 +311,7 @@ describe("API testing", () => {
           .post("/api/articles/1/comments")
           .expect(400)
           .then(({ body: { msg } }) => {
-            expect(msg).to.equal("Bad Request - username and body required");
+            expect(msg).to.equal('null value in column "author" violates not-null constraint');
           });
       });
       it('ERROR - gives a 405 status and "Method Not Allowed" when attempting to patch, put or delete comments', () => {

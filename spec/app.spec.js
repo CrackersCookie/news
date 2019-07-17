@@ -408,12 +408,23 @@ describe("API testing", () => {
         });
     });
   });
-  describe('GET /api/articles', () => {
-    it('returns a 200 status and an array of article objects with the correct keys', () => {
+  describe.only('GET /api/articles', () => {
+    it('returns a 200 status and an array of all the article objects with the correct keys', () => {
       return request(app)
         .get('/api/articles')
         .expect(200)
-        .then(({ body: { articles } }).to.contain.keys('author', 'title', 'article_id', 'topic', 'created_ay', 'votes'))
+        .then(({ body: { articles } }) => {
+          expect(articles[0]).to.contain.keys('author', 'title', 'article_id', 'topic', 'created_at', 'votes')
+          expect(articles.length).to.equal(12)
+        })
+    })
+    it('returns a 200 status and each article has a key of comment_count', () => {
+      return request(app)
+        .get('/api/articles')
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(articles[0]).to.contain.keys('comment_count')
+        })
     })
   })
   describe("ERROR/not-a-route", () => {

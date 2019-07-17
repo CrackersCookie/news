@@ -3,9 +3,12 @@ const {
   sendArticleByID,
   editArticleByID,
   postCommentByArticleID,
-  sendCommentsByArticleID
+  sendCommentsByArticleID,
+  sendArticles
 } = require("../controllers/articles");
 const { methodNotFound } = require("../errors/errors");
+
+articlesRouter.route('/').get(sendArticles)
 
 articlesRouter
   .route("/:article_id")

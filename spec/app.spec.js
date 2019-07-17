@@ -426,6 +426,38 @@ describe("API testing", () => {
           expect(articles[0]).to.contain.keys('comment_count')
         })
     })
+    it("returns a 200 and sorts the results by the column provided", () => {
+      return request(app)
+        .get("/api/articles?sort_by=votes")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(articles).to.be.descendingBy("votes");
+        });
+    });
+    it("returns a 200 and sorts the results by created_at by default", () => {
+      return request(app)
+        .get("/api/articles/")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(articles).to.be.descendingBy("created_at");
+        });
+    });
+    it("returns a 200 and sorts the results in ascending order when the order query is specified ", () => {
+      return request(app)
+        .get("/api/articles?order=asc")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(articles).to.be.ascendingBy("created_at");
+        });
+    });
+    it("returns a 200 and sorts the results in descending order by default", () => {
+      return request(app)
+        .get("/api/articles/")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(articles).to.be.descendingBy("created_at");
+        });
+    });
   })
   describe("ERROR/not-a-route", () => {
     it('gives a 404 erorr and "Route Not Found" when using a route that does not exist', () => {

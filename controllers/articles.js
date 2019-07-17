@@ -40,7 +40,7 @@ const sendCommentsByArticleID = (req, res, next) => {
 };
 
 const sendArticles = (req, res, next) => {
-  selectArticles().then((articles) => {
+  selectArticles(req.query).then((articles) => {
     res.status(200).send({ articles })
   })
 }

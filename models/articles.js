@@ -91,7 +91,7 @@ const selectCommentsByArticleID = (
   }
 };
 
-const selectArticles = () => {
+const selectArticles = ({ sort_by = 'created_at', order }) => {
   return connection
     .select('articles.author',
       'title',
@@ -103,6 +103,7 @@ const selectArticles = () => {
     .from('articles')
     .leftJoin('comments', 'articles.article_id', 'comments.article_id')
     .groupBy('articles.article_id')
+    .orderBy(sort_by, order || 'desc')
 }
 
 module.exports = {

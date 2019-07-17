@@ -21,17 +21,19 @@ describe("API testing", () => {
           expect(body.topics[0]).to.have.keys("slug", "description");
         });
     });
-    it('ERROR - gives a 405 status and "Method Not Allowed" when attempting to post, patch or delete topics', () => {
-      const invalidMethods = ["patch", "put", "delete"];
-      const methodPromises = invalidMethods.map(method => {
-        return request(app)
-        [method]("/api/topics")
-          .expect(405)
-          .then(({ body: { msg } }) => {
-            expect(msg).to.equal("Method Not Allowed");
-          });
+    describe('Error handling', () => {
+      it('ERROR - gives a 405 status and "Method Not Allowed" when attempting to post, patch or delete topics', () => {
+        const invalidMethods = ["patch", "put", "delete"];
+        const methodPromises = invalidMethods.map(method => {
+          return request(app)
+          [method]("/api/topics")
+            .expect(405)
+            .then(({ body: { msg } }) => {
+              expect(msg).to.equal("Method Not Allowed");
+            });
+        });
+        return Promise.all(methodPromises);
       });
-      return Promise.all(methodPromises);
     });
   });
   describe("GET/api/users/:username", () => {
@@ -43,25 +45,27 @@ describe("API testing", () => {
           expect(user).to.have.keys("username", "avatar_url", "name");
         });
     });
-    it("ERROR - returns a status 404 and a message indicating the user was not found when an invalid username is requested", () => {
-      return request(app)
-        .get("/api/users/not-valid-user")
-        .expect(404)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal("User Not Found");
-        });
-    });
-    it('ERROR - gives a 405 status and "Method Not Allowed" when attempting to post, patch or delete users by username', () => {
-      const invalidMethods = ["patch", "put", "delete"];
-      const methodPromises = invalidMethods.map(method => {
+    describe('Error handling', () => {
+      it("ERROR - returns a status 404 and a message indicating the user was not found when an invalid username is requested", () => {
         return request(app)
-        [method]("/api/users/5")
-          .expect(405)
+          .get("/api/users/not-valid-user")
+          .expect(404)
           .then(({ body: { msg } }) => {
-            expect(msg).to.equal("Method Not Allowed");
+            expect(msg).to.equal("User Not Found");
           });
       });
-      return Promise.all(methodPromises);
+      it('ERROR - gives a 405 status and "Method Not Allowed" when attempting to post, patch or delete users by username', () => {
+        const invalidMethods = ["patch", "put", "delete"];
+        const methodPromises = invalidMethods.map(method => {
+          return request(app)
+          [method]("/api/users/5")
+            .expect(405)
+            .then(({ body: { msg } }) => {
+              expect(msg).to.equal("Method Not Allowed");
+            });
+        });
+        return Promise.all(methodPromises);
+      });
     });
   });
   describe("GET /api/articles/:article_id", () => {
@@ -90,35 +94,37 @@ describe("API testing", () => {
           expect(+article.comment_count).to.equal(0);
         });
     });
-    it('ERROR - gives a 405 status and "Method Not Allowed" when attempting to post or delete articles by article_id', () => {
-      const invalidMethods = ["post", "delete"];
-      const methodPromises = invalidMethods.map(method => {
+    describe('Error handling', () => {
+      it('ERROR - gives a 405 status and "Method Not Allowed" when attempting to post or delete articles by article_id', () => {
+        const invalidMethods = ["post", "delete"];
+        const methodPromises = invalidMethods.map(method => {
+          return request(app)
+          [method]("/api/articles/34")
+            .expect(405)
+            .then(({ body: { msg } }) => {
+              expect(msg).to.equal("Method Not Allowed");
+            });
+        });
+        return Promise.all(methodPromises);
+      });
+      it('ERROR / GET it returns a status 400 and a "bad Request" message when passed an article_id in the wrong format', () => {
         return request(app)
-        [method]("/api/articles/34")
-          .expect(405)
+          .get("/api/articles/string-not-an-integer")
+          .expect(400)
           .then(({ body: { msg } }) => {
-            expect(msg).to.equal("Method Not Allowed");
+            expect(msg).to.equal(
+              'invalid input syntax for integer: "string-not-an-integer"'
+            );
           });
       });
-      return Promise.all(methodPromises);
-    });
-    it('ERROR / GET it returns a status 400 and a "bad Request" message when passed an article_id in the wrong format', () => {
-      return request(app)
-        .get("/api/articles/string-not-an-integer")
-        .expect(400)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal(
-            'invalid input syntax for integer: "string-not-an-integer"'
-          );
-        });
-    });
-    it('ERROR / GET it returns a status 404 and a "Article Not Found" message when passed an article_id that does not exist in the database', () => {
-      return request(app)
-        .get("/api/articles/9999")
-        .expect(404)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal("Article Not Found");
-        });
+      it('ERROR / GET it returns a status 404 and a "Article Not Found" message when passed an article_id that does not exist in the database', () => {
+        return request(app)
+          .get("/api/articles/9999")
+          .expect(404)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal("Article Not Found");
+          });
+      });
     });
   });
   describe("PATCH /api/articles/:article_id", () => {
@@ -149,66 +155,68 @@ describe("API testing", () => {
           expect(votes).to.equal(99);
         });
     });
-    it('ERROR returns a status 400 when sent an empty request body with no "inc_votes" value on it', () => {
-      return request(app)
-        .patch("/api/articles/1")
-        .send({})
-        .expect(400)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal(
-            "Bad Request - inc_votes missing from request body"
-          );
-        });
-    });
-    it('ERROR returns a status 400 when sent a patch with an invalid "inc_votes" value', () => {
-      return request(app)
-        .patch("/api/articles/1")
-        .send({ inc_votes: "string-not-an-integer" })
-        .expect(400)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal('invalid input syntax for integer: "NaN"');
-        });
-    });
-    it("ERROR returns a status 400 when sent a patch with additional keys", () => {
-      return request(app)
-        .patch("/api/articles/1")
-        .send({ inc_votes: 1, more_votes: 3 })
-        .expect(400)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal(
-            "Bad Request - must only contain inc_votes values"
-          );
-        });
-    });
-    it("ERROR returns a status 400 when no body is sent", () => {
-      return request(app)
-        .patch("/api/articles/1")
-        .expect(400)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal(
-            "Bad Request - inc_votes missing from request body"
-          );
-        });
-    });
-    it("ERROR returns a status 404 error when the article_id is not found", () => {
-      return request(app)
-        .patch("/api/articles/9999")
-        .send({ inc_votes: 1 })
-        .expect(404)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal("Article Not Found");
-        });
-    });
-    it("ERROR returns a status 400 error when the article_id is in an invalid format", () => {
-      return request(app)
-        .patch("/api/articles/string-not-an-integer")
-        .send({ inc_votes: 1 })
-        .expect(400)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal(
-            'invalid input syntax for integer: "string-not-an-integer"'
-          );
-        });
+    describe('Error handling', () => {
+      it('ERROR returns a status 400 when sent an empty request body with no "inc_votes" value on it', () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send({})
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal(
+              "Bad Request - inc_votes missing from request body"
+            );
+          });
+      });
+      it('ERROR returns a status 400 when sent a patch with an invalid "inc_votes" value', () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send({ inc_votes: "string-not-an-integer" })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal('invalid input syntax for integer: "NaN"');
+          });
+      });
+      it("ERROR returns a status 400 when sent a patch with additional keys", () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send({ inc_votes: 1, more_votes: 3 })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal(
+              "Bad Request - must only contain inc_votes values"
+            );
+          });
+      });
+      it("ERROR returns a status 400 when no body is sent", () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal(
+              "Bad Request - inc_votes missing from request body"
+            );
+          });
+      });
+      it("ERROR returns a status 404 error when the article_id is not found", () => {
+        return request(app)
+          .patch("/api/articles/9999")
+          .send({ inc_votes: 1 })
+          .expect(404)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal("Article Not Found");
+          });
+      });
+      it("ERROR returns a status 400 error when the article_id is in an invalid format", () => {
+        return request(app)
+          .patch("/api/articles/string-not-an-integer")
+          .send({ inc_votes: 1 })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal(
+              'invalid input syntax for integer: "string-not-an-integer"'
+            );
+          });
+      });
     });
   });
   describe("POST /api/articles/:article_id/comments", () => {
@@ -228,94 +236,96 @@ describe("API testing", () => {
           );
         });
     });
-    it("ERROR - returns a status 404 when artilce_id is not found", () => {
-      return request(app)
-        .post("/api/articles/9999/comments")
-        .send({ username: "butter_bridge", body: "clever comment goes here" })
-        .expect(404)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal("Not Found");
-        });
-    });
-    it("ERROR - returns a status 400 when artilce_id is in an invalid format", () => {
-      return request(app)
-        .post("/api/articles/string-not-an-integer/comments")
-        .send({ username: "butter_bridge", body: "clever comment goes here" })
-        .expect(400)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal(
-            'invalid input syntax for integer: "string-not-an-integer"'
-          );
-        });
-    });
-    it("ERROR - returns a status 404 when username is not found", () => {
-      return request(app)
-        .post("/api/articles/1/comments")
-        .send({ username: "butter_bridges", body: "clever comment goes here" })
-        .expect(404)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal("Not Found");
-        });
-    });
-    it("ERROR - returns a status 400 when the body of the comment is left blank is not found", () => {
-      return request(app)
-        .post("/api/articles/1/comments")
-        .send({ username: "butter_bridge", body: "" })
-        .expect(400)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal("Bad Request - username and body required");
-        });
-    });
-    it("ERROR - returns a status 400 when the username is not supplied", () => {
-      return request(app)
-        .post("/api/articles/1/comments")
-        .send({ body: "Test" })
-        .expect(400)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal("Bad Request - username and body required");
-        });
-    });
-    it("ERROR - returns a status 400 when the comment body is not supplied", () => {
-      return request(app)
-        .post("/api/articles/1/comments")
-        .send({ username: "butter_bridge" })
-        .expect(400)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal("Bad Request - username and body required");
-        });
-    });
-    it("ERROR - returns a status 404 when additional data is provided on additional keys", () => {
-      return request(app)
-        .post("/api/articles/1/comments")
-        .send({
-          username: "butter_bridge",
-          body: "clever comment goes here",
-          password: "some-string"
-        })
-        .expect(400)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal("Bad Request - Invalid key supplied");
-        });
-    });
-    it("ERROR - returns a status 400 and an error message when no body is supplied", () => {
-      return request(app)
-        .post("/api/articles/1/comments")
-        .expect(400)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal("Bad Request - username and body required");
-        });
-    });
-    it('ERROR - gives a 405 status and "Method Not Allowed" when attempting to patch, put or delete comments', () => {
-      const invalidMethods = ["patch", "put", "delete"];
-      const methodPromises = invalidMethods.map(method => {
+    describe('Error handling', () => {
+      it("ERROR - returns a status 404 when artilce_id is not found", () => {
         return request(app)
-        [method]("/api/articles/1/comments")
-          .expect(405)
+          .post("/api/articles/9999/comments")
+          .send({ username: "butter_bridge", body: "clever comment goes here" })
+          .expect(404)
           .then(({ body: { msg } }) => {
-            expect(msg).to.equal("Method Not Allowed");
+            expect(msg).to.equal("Not Found");
           });
       });
-      return Promise.all(methodPromises);
+      it("ERROR - returns a status 400 when artilce_id is in an invalid format", () => {
+        return request(app)
+          .post("/api/articles/string-not-an-integer/comments")
+          .send({ username: "butter_bridge", body: "clever comment goes here" })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal(
+              'invalid input syntax for integer: "string-not-an-integer"'
+            );
+          });
+      });
+      it("ERROR - returns a status 404 when username is not found", () => {
+        return request(app)
+          .post("/api/articles/1/comments")
+          .send({ username: "butter_bridges", body: "clever comment goes here" })
+          .expect(404)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal("Not Found");
+          });
+      });
+      it("ERROR - returns a status 400 when the body of the comment is left blank is not found", () => {
+        return request(app)
+          .post("/api/articles/1/comments")
+          .send({ username: "butter_bridge", body: "" })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal("Bad Request - username and body required");
+          });
+      });
+      it("ERROR - returns a status 400 when the username is not supplied", () => {
+        return request(app)
+          .post("/api/articles/1/comments")
+          .send({ body: "Test" })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal("Bad Request - username and body required");
+          });
+      });
+      it("ERROR - returns a status 400 when the comment body is not supplied", () => {
+        return request(app)
+          .post("/api/articles/1/comments")
+          .send({ username: "butter_bridge" })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal("Bad Request - username and body required");
+          });
+      });
+      it("ERROR - returns a status 404 when additional data is provided on additional keys", () => {
+        return request(app)
+          .post("/api/articles/1/comments")
+          .send({
+            username: "butter_bridge",
+            body: "clever comment goes here",
+            password: "some-string"
+          })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal("Bad Request - Invalid key supplied");
+          });
+      });
+      it("ERROR - returns a status 400 and an error message when no body is supplied", () => {
+        return request(app)
+          .post("/api/articles/1/comments")
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal("Bad Request - username and body required");
+          });
+      });
+      it('ERROR - gives a 405 status and "Method Not Allowed" when attempting to patch, put or delete comments', () => {
+        const invalidMethods = ["patch", "put", "delete"];
+        const methodPromises = invalidMethods.map(method => {
+          return request(app)
+          [method]("/api/articles/1/comments")
+            .expect(405)
+            .then(({ body: { msg } }) => {
+              expect(msg).to.equal("Method Not Allowed");
+            });
+        });
+        return Promise.all(methodPromises);
+      });
     });
   });
   describe("GET /api/articles/:article_id/comments", () => {
@@ -365,47 +375,49 @@ describe("API testing", () => {
           expect(comments).to.be.descendingBy("created_at");
         });
     });
-    it("ERROR - returns a 404 and article not found message when passed an article_id that does not exist", () => {
-      return request(app)
-        .get("/api/articles/9999/comments")
-        .expect(404)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal("Article or Comments Not Found");
-        });
-    });
-    it("ERROR - returns a 400 and Bad Request message when passed an article_id that is invalid", () => {
-      return request(app)
-        .get("/api/articles/string-not-an-integer/comments")
-        .expect(400)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal(
-            'invalid input syntax for integer: "string-not-an-integer"'
-          );
-        });
-    });
-    it("ERROR - returns a 404 and Not Found message when passed an article_id that has no comments but is valid", () => {
-      return request(app)
-        .get("/api/articles/10/comments")
-        .expect(404)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal("Article or Comments Not Found");
-        });
-    });
-    it("ERROR - returns a 400 error when sorted by an invalid column", () => {
-      return request(app)
-        .get("/api/articles/1/comments?sort_by=invalid-column")
-        .expect(400)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal('column "invalid-column" does not exist');
-        });
-    });
-    it("ERROR - returns a 400 error when ordered by an invalid value", () => {
-      return request(app)
-        .get("/api/articles/1/comments?order=invaid-input")
-        .expect(400)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal("Invalid sort order");
-        });
+    describe('', () => {
+      it("ERROR - returns a 404 and article not found message when passed an article_id that does not exist", () => {
+        return request(app)
+          .get("/api/articles/9999/comments")
+          .expect(404)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal("Article or Comments Not Found");
+          });
+      });
+      it("ERROR - returns a 400 and Bad Request message when passed an article_id that is invalid", () => {
+        return request(app)
+          .get("/api/articles/string-not-an-integer/comments")
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal(
+              'invalid input syntax for integer: "string-not-an-integer"'
+            );
+          });
+      });
+      it("ERROR - returns a 404 and Not Found message when passed an article_id that has no comments but is valid", () => {
+        return request(app)
+          .get("/api/articles/10/comments")
+          .expect(404)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal("Article or Comments Not Found");
+          });
+      });
+      it("ERROR - returns a 400 error when sorted by an invalid column", () => {
+        return request(app)
+          .get("/api/articles/1/comments?sort_by=invalid-column")
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal('column "invalid-column" does not exist');
+          });
+      });
+      it("ERROR - returns a 400 error when ordered by an invalid value", () => {
+        return request(app)
+          .get("/api/articles/1/comments?order=invaid-input")
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal("Invalid sort order");
+          });
+      });
     });
   });
   describe('GET /api/articles', () => {
@@ -476,50 +488,52 @@ describe("API testing", () => {
           expect(articles.length).to.equal(1)
         });
     });
-    it("ERROR - returns a 400 error when sorted by an invalid column", () => {
-      return request(app)
-        .get("/api/articles?sort_by=invalid-column")
-        .expect(400)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal('column "invalid-column" does not exist');
-        });
-    });
-    it("ERROR - returns a 400 error when ordered by an invalid value", () => {
-      return request(app)
-        .get("/api/articles?order=invaid-input")
-        .expect(400)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal("Invalid sort order");
-        });
-    });
-    it("ERROR - returns a 404 error when an author is not found", () => {
-      return request(app)
-        .get("/api/articles?author=mickey-mouse")
-        .expect(404)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal("Not Found");
-        });
-    });
-    it("ERROR - returns a 404 error when an author is not found", () => {
-      return request(app)
-        .get("/api/articles?topic=disney-films")
-        .expect(404)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal("Not Found");
-        });
-    });
-    it('ERROR - gives a 405 status and "Method Not Allowed" when attempting to post, patch, put or delete topics', () => {
-      const invalidMethods = ["post", "patch", "put", "delete"];
-      const methodPromises = invalidMethods.map(method => {
+    describe('Error handling', () => {
+      it("ERROR - returns a 400 error when sorted by an invalid column", () => {
         return request(app)
-        [method]("/api/articles")
-          .expect(405)
+          .get("/api/articles?sort_by=invalid-column")
+          .expect(400)
           .then(({ body: { msg } }) => {
-            expect(msg).to.equal("Method Not Allowed");
+            expect(msg).to.equal('column "invalid-column" does not exist');
           });
       });
+      it("ERROR - returns a 400 error when ordered by an invalid value", () => {
+        return request(app)
+          .get("/api/articles?order=invaid-input")
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal("Invalid sort order");
+          });
+      });
+      it("ERROR - returns a 404 error when an author is not found", () => {
+        return request(app)
+          .get("/api/articles?author=mickey-mouse")
+          .expect(404)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal("Not Found");
+          });
+      });
+      it("ERROR - returns a 404 error when an author is not found", () => {
+        return request(app)
+          .get("/api/articles?topic=disney-films")
+          .expect(404)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal("Not Found");
+          });
+      });
+      it('ERROR - gives a 405 status and "Method Not Allowed" when attempting to post, patch, put or delete topics', () => {
+        const invalidMethods = ["post", "patch", "put", "delete"];
+        const methodPromises = invalidMethods.map(method => {
+          return request(app)
+          [method]("/api/articles")
+            .expect(405)
+            .then(({ body: { msg } }) => {
+              expect(msg).to.equal("Method Not Allowed");
+            });
+        });
+      });
     });
-  })
+  });
   describe('PATCH /api/comments/:comment_id', () => {
     it('returns a status 200 when patched with an object with a "inc_votes" key with a positive value and increases the number of votes on a comment by that number - returning the updated comment', () => {
       return request(app)
@@ -547,78 +561,105 @@ describe("API testing", () => {
           expect(votes).to.equal(6);
         });
     });
-    it('ERROR returns a status 400 when sent an empty request body with no "inc_votes" value on it', () => {
-      return request(app)
-        .patch("/api/comments/1")
-        .send({})
-        .expect(400)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal(
-            "Bad Request - inc_votes missing from request body"
-          );
-        });
-    });
-    it('ERROR returns a status 400 when sent a patch with an invalid "inc_votes" value', () => {
-      return request(app)
-        .patch("/api/comments/1")
-        .send({ inc_votes: "string-not-an-integer" })
-        .expect(400)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal('invalid input syntax for integer: "NaN"');
-        });
-    });
-    it("ERROR returns a status 400 when sent a patch with additional keys", () => {
-      return request(app)
-        .patch("/api/comments/1")
-        .send({ inc_votes: 1, more_votes: 3 })
-        .expect(400)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal(
-            "Bad Request - must only contain inc_votes values"
-          );
-        });
-    });
-    it("ERROR returns a status 400 when no body is sent", () => {
-      return request(app)
-        .patch("/api/comments/1")
-        .expect(400)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal(
-            "Bad Request - inc_votes missing from request body"
-          );
-        });
-    });
-    it("ERROR returns a status 400 error when the article_id is in an invalid format", () => {
-      return request(app)
-        .patch("/api/comments/string-not-an-integer")
-        .send({ inc_votes: 1 })
-        .expect(400)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal(
-            'invalid input syntax for integer: "string-not-an-integer"'
-          );
-        });
-    });
-    it("ERROR returns a status 404 error when the article_id is not found", () => {
-      return request(app)
-        .patch("/api/comments/9999")
-        .send({ inc_votes: 1 })
-        .expect(404)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal("Article Not Found");
-        });
-    });
-    it('ERROR - gives a 405 status and "Method Not Allowed" when attempting to get, post or put topics', () => {
-      const invalidMethods = ["get", "post", "put"];
-      const methodPromises = invalidMethods.map(method => {
+    describe('Error handling', () => {
+      it('ERROR returns a status 400 when sent an empty request body with no "inc_votes" value on it', () => {
         return request(app)
-        [method]("/api/comments/1")
-          .expect(405)
+          .patch("/api/comments/1")
+          .send({})
+          .expect(400)
           .then(({ body: { msg } }) => {
-            expect(msg).to.equal("Method Not Allowed");
+            expect(msg).to.equal(
+              "Bad Request - inc_votes missing from request body"
+            );
           });
       });
-      return Promise.all(methodPromises);
+      it('ERROR returns a status 400 when sent a patch with an invalid "inc_votes" value', () => {
+        return request(app)
+          .patch("/api/comments/1")
+          .send({ inc_votes: "string-not-an-integer" })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal('invalid input syntax for integer: "NaN"');
+          });
+      });
+      it("ERROR returns a status 400 when sent a patch with additional keys", () => {
+        return request(app)
+          .patch("/api/comments/1")
+          .send({ inc_votes: 1, more_votes: 3 })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal(
+              "Bad Request - must only contain inc_votes values"
+            );
+          });
+      });
+      it("ERROR returns a status 400 when no body is sent", () => {
+        return request(app)
+          .patch("/api/comments/1")
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal(
+              "Bad Request - inc_votes missing from request body"
+            );
+          });
+      });
+      it("ERROR returns a status 400 error when the article_id is in an invalid format", () => {
+        return request(app)
+          .patch("/api/comments/string-not-an-integer")
+          .send({ inc_votes: 1 })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal(
+              'invalid input syntax for integer: "string-not-an-integer"'
+            );
+          });
+      });
+      it("ERROR returns a status 404 error when the article_id is not found", () => {
+        return request(app)
+          .patch("/api/comments/9999")
+          .send({ inc_votes: 1 })
+          .expect(404)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal("Article Not Found");
+          });
+      });
+      it('ERROR gives a 405 status and "Method Not Allowed" when attempting to get, post or put topics', () => {
+        const invalidMethods = ["get", "post", "put"];
+        const methodPromises = invalidMethods.map(method => {
+          return request(app)
+          [method]("/api/comments/1")
+            .expect(405)
+            .then(({ body: { msg } }) => {
+              expect(msg).to.equal("Method Not Allowed");
+            });
+        });
+        return Promise.all(methodPromises);
+      });
+    });
+  });
+  describe('DELETE /api/comments/:comment_id', () => {
+    it('returns a status 204 deleting the comment from the database', () => {
+      return request(app)
+        .delete('/api/comments/1')
+        .expect(204)
+    });
+    describe('Error handling', () => {
+      it('ERROR returns a status 404 when attempting to delete a comment that does not exist', () => {
+        return request(app)
+          .delete('/api/comments/9999')
+          .expect(404)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal('Comment Not Found')
+          })
+      })
+      it('ERROR returns a status 400 when attempting to delete a comment that does not exist', () => {
+        return request(app)
+          .delete('/api/comments/not-a-valid-id')
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal('invalid input syntax for integer: "not-a-valid-id"')
+          })
+      });
     });
   });
   describe("ERROR/not-a-route", () => {

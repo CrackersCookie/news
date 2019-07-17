@@ -20,9 +20,9 @@ const updateArticleVotesByID = ({ article_id }, body) => {
   else {
     const votes = body.inc_votes;
     return connection
+      .increment({ votes })
       .from("articles")
       .where({ article_id })
-      .increment({ votes })
       .returning("*")
       .then(article => {
         if (!article.length) return Promise.reject({ status: 404, msg: "Article Not Found" });

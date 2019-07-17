@@ -520,6 +520,34 @@ describe("API testing", () => {
       });
     });
   })
+  describe('PATCH /api/comments/:comment_id', () => {
+    it('returns a status 200 when patched with an object with a "inc_votes" key with a positive value and increases the number of votes on a comment by that number - returning the updated comment', () => {
+      return request(app)
+        .patch("/api/comments/1")
+        .send({ inc_votes: 10 })
+        .expect(200)
+        .then(({ body: { article } }) => {
+          expect(article.votes).to.equal(26);
+          expect(article).to.have.keys(
+            "comment_id",
+            "author",
+            "article_id",
+            "votes",
+            "created_at",
+            "body"
+          );
+        });
+    });
+    // it('returns a status 200 when patched with an object with a "inc_votes" key with a negative value and decreases the number of votes on an article by that number', () => {
+    //   return request(app)
+    //     .patch("/api/articles/1")
+    //     .send({ inc_votes: -1 })
+    //     .expect(200)
+    //     .then(({ body: { article: { votes } } }) => {
+    //       expect(votes).to.equal(99);
+    //     });
+    // });
+  });
   describe("ERROR/not-a-route", () => {
     it('gives a 404 erorr and "Route Not Found" when using a route that does not exist', () => {
       return request(app)

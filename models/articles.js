@@ -9,26 +9,15 @@ const selectArticleByID = ({ article_id }) => {
     .leftJoin("comments", "articles.article_id", "comments.article_id")
     .groupBy('articles.article_id')
     .then(articleData => {
-      if (!articleData.length)
-        return Promise.reject({ status: 404, msg: "Article Not Found" });
-      else {
-        return articleData[0]
-      }
+      if (!articleData.length) return Promise.reject({ status: 404, msg: "Article Not Found" });
+      else return articleData[0]
     });
 };
 
 const updateArticleVotesByID = ({ article_id }, body) => {
-  if (!body.inc_votes)
-    return Promise.reject({
-      status: 400,
-      msg: "Bad Request - inc_votes missing from request body"
-    });
-  else if (Object.keys(body).length > 1) {
-    return Promise.reject({
-      status: 400,
-      msg: "Bad Request - must only contain inc_votes values"
-    });
-  } else {
+  if (!body.inc_votes) return Promise.reject({ status: 400, msg: "Bad Request - inc_votes missing from request body" });
+  else if (Object.keys(body).length > 1) return Promise.reject({ status: 400, msg: "Bad Request - must only contain inc_votes values" });
+  else {
     const votes = body.inc_votes;
     return connection
       .from("articles")
@@ -36,25 +25,16 @@ const updateArticleVotesByID = ({ article_id }, body) => {
       .increment({ votes })
       .returning("*")
       .then(article => {
-        if (!article.length)
-          return Promise.reject({ status: 404, msg: "Article Not Found" });
-        return article[0];
+        if (!article.length) return Promise.reject({ status: 404, msg: "Article Not Found" });
+        else return article[0];
       });
   }
 };
 
 const insertCommentByArticleID = ({ article_id }, reqBody) => {
   const { username, body } = reqBody;
-  if (!body || !body.length || !username) {
-    return Promise.reject({
-      status: 400,
-      msg: "Bad Request - username and body required"
-    });
-  } else if (Object.keys(reqBody).length > 2)
-    return Promise.reject({
-      status: 400,
-      msg: "Bad Request - Invalid key supplied"
-    });
+  if (!body || !body.length || !username) return Promise.reject({ status: 400, msg: "Bad Request - username and body required" });
+  else if (Object.keys(reqBody).length > 2) return Promise.reject({ status: 400, msg: "Bad Request - Invalid key supplied" });
   else {
     const author = username;
     return connection
@@ -76,23 +56,13 @@ const selectCommentsByArticleID = (
       .where({ article_id })
       .orderBy(sort_by || "created_at", order)
       .then(comments => {
-        if (!comments.length) {
-          return Promise.reject({
-            status: 404,
-            msg: "Article or Comments Not Found"
-          });
-        } else return comments;
+        if (!comments.length) return Promise.reject({ status: 404, msg: "Article or Comments Not Found" });
+        else return comments;
       });
-  } else {
-    return Promise.reject({
-      status: 400,
-      msg: "Invalid sort order"
-    });
-  }
+  } else return Promise.reject({ status: 400, msg: "Invalid sort order" });
 };
 
 const selectArticles = ({ sort_by = 'created_at', order = 'desc', author, topic }) => {
-
   if (order === "asc" || order === "desc") {
     return connection
       .select('articles.author',
@@ -111,18 +81,11 @@ const selectArticles = ({ sort_by = 'created_at', order = 'desc', author, topic 
         if (topic) query.where({ topic })
       })
       .then((articles) => {
-        if (!articles.length) {
-          return Promise.reject({ status: 404, msg: "Not Found" })
-        }
+        if (!articles.length) return Promise.reject({ status: 404, msg: "Not Found" })
         else return articles
       })
   }
-  else {
-    return Promise.reject({
-      status: 400,
-      msg: "Invalid sort order"
-    });
-  }
+  else return Promise.reject({ status: 400, msg: "Invalid sort order" });
 }
 
 module.exports = {

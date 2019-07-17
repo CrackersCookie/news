@@ -54,8 +54,8 @@ describe("API testing", () => {
             expect(msg).to.equal("User Not Found");
           });
       });
-      it('ERROR - gives a 405 status and "Method Not Allowed" when attempting to post, patch or delete users by username', () => {
-        const invalidMethods = ["patch", "put", "delete"];
+      it('ERROR - gives a 405 status and "Method Not Allowed" when attempting to post, patch, put or delete users by username', () => {
+        const invalidMethods = ["post", "patch", "put", "delete"];
         const methodPromises = invalidMethods.map(method => {
           return request(app)
           [method]("/api/users/5")
@@ -343,7 +343,7 @@ describe("API testing", () => {
           );
         });
     });
-    it("returns a 200 and sorts the results using a sort_by query", () => {
+    it("returns a status 200 and sorts the results using a sort_by query", () => {
       return request(app)
         .get("/api/articles/1/comments?sort_by=votes")
         .expect(200)
@@ -351,7 +351,7 @@ describe("API testing", () => {
           expect(comments).to.be.descendingBy("votes");
         });
     });
-    it("returns a 200 and sorts the results by created_at by default", () => {
+    it("returns a status 200 and sorts the results by created_at by default", () => {
       return request(app)
         .get("/api/articles/1/comments")
         .expect(200)
@@ -359,7 +359,7 @@ describe("API testing", () => {
           expect(comments).to.be.descendingBy("created_at");
         });
     });
-    it("returns a 200 and sorts the results in ascending order when the order query is specified ", () => {
+    it("returns a status 200 and sorts the results in ascending order when the order query is specified ", () => {
       return request(app)
         .get("/api/articles/1/comments?order=asc")
         .expect(200)
@@ -367,7 +367,7 @@ describe("API testing", () => {
           expect(comments).to.be.ascendingBy("created_at");
         });
     });
-    it("returns a 200 and sorts the results in descending order by default", () => {
+    it("returns a status 200 and sorts the results in descending order by default", () => {
       return request(app)
         .get("/api/articles/1/comments")
         .expect(200)
@@ -438,7 +438,7 @@ describe("API testing", () => {
           expect(articles[0]).to.contain.keys('comment_count')
         })
     })
-    it("returns a 200 and sorts the results by the column provided", () => {
+    it("returns a status 200 and sorts the results by the column provided", () => {
       return request(app)
         .get("/api/articles?sort_by=votes")
         .expect(200)
@@ -446,7 +446,7 @@ describe("API testing", () => {
           expect(articles).to.be.descendingBy("votes");
         });
     });
-    it("returns a 200 and sorts the results by created_at by default", () => {
+    it("returns a status 200 and sorts the results by created_at by default", () => {
       return request(app)
         .get("/api/articles/")
         .expect(200)
@@ -454,7 +454,7 @@ describe("API testing", () => {
           expect(articles).to.be.descendingBy("created_at");
         });
     });
-    it("returns a 200 and sorts the results in ascending order when the order query is specified ", () => {
+    it("returns a status 200 and sorts the results in ascending order when the order query is specified ", () => {
       return request(app)
         .get("/api/articles?order=asc")
         .expect(200)
@@ -462,7 +462,7 @@ describe("API testing", () => {
           expect(articles).to.be.ascendingBy("created_at");
         });
     });
-    it("returns a 200 and sorts the results in descending order by default", () => {
+    it("returns a status 200 and sorts the results in descending order by default", () => {
       return request(app)
         .get("/api/articles/")
         .expect(200)
@@ -470,7 +470,7 @@ describe("API testing", () => {
           expect(articles).to.be.descendingBy("created_at");
         });
     });
-    it("returns a 200 and filters the articles by username specified in a author query", () => {
+    it("returns a status 200 and filters the articles by username specified in a author query", () => {
       return request(app)
         .get("/api/articles?author=butter_bridge")
         .expect(200)
@@ -479,7 +479,7 @@ describe("API testing", () => {
           expect(articles.length).to.equal(3)
         });
     });
-    it("returns a 200 and filters the articles by topic specified in a topic query", () => {
+    it("returns a status 200 and filters the articles by topic specified in a topic query", () => {
       return request(app)
         .get("/api/articles?topic=cats")
         .expect(200)
@@ -531,6 +531,7 @@ describe("API testing", () => {
               expect(msg).to.equal("Method Not Allowed");
             });
         });
+        return Promise.all(methodPromises);
       });
     });
   });

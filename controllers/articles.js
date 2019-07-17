@@ -1,10 +1,10 @@
 const {
   selectArticleByID,
   updateArticleVotesByID,
-  insertCommentByArticleID,
-  selectCommentsByArticleID,
   selectArticles
 } = require("../models/articles");
+const { insertCommentByArticleID,
+  selectCommentsByArticleID } = require('../models/comments')
 
 const sendArticleByID = (req, res, next) => {
   selectArticleByID(req.params)

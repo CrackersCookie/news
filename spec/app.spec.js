@@ -608,6 +608,18 @@ describe("API testing", () => {
           expect(msg).to.equal("Article Not Found");
         });
     });
+    it('ERROR - gives a 405 status and "Method Not Allowed" when attempting to get, post or put topics', () => {
+      const invalidMethods = ["get", "post", "put"];
+      const methodPromises = invalidMethods.map(method => {
+        return request(app)
+        [method]("/api/comments/1")
+          .expect(405)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal("Method Not Allowed");
+          });
+      });
+      return Promise.all(methodPromises);
+    });
   });
   describe("ERROR/not-a-route", () => {
     it('gives a 404 erorr and "Route Not Found" when using a route that does not exist', () => {

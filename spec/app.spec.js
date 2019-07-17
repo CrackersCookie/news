@@ -25,7 +25,7 @@ describe("API testing", () => {
       const invalidMethods = ["patch", "put", "delete"];
       const methodPromises = invalidMethods.map(method => {
         return request(app)
-          [method]("/api/topics")
+        [method]("/api/topics")
           .expect(405)
           .then(({ body: { msg } }) => {
             expect(msg).to.equal("Method Not Allowed");
@@ -55,7 +55,7 @@ describe("API testing", () => {
       const invalidMethods = ["patch", "put", "delete"];
       const methodPromises = invalidMethods.map(method => {
         return request(app)
-          [method]("/api/users/5")
+        [method]("/api/users/5")
           .expect(405)
           .then(({ body: { msg } }) => {
             expect(msg).to.equal("Method Not Allowed");
@@ -87,14 +87,14 @@ describe("API testing", () => {
         .get("/api/articles/2")
         .expect(200)
         .then(({ body: { article } }) => {
-          expect(article.comment_count).to.equal(0);
+          expect(+article.comment_count).to.equal(0);
         });
     });
     it('ERROR - gives a 405 status and "Method Not Allowed" when attempting to post or delete articles by article_id', () => {
       const invalidMethods = ["post", "delete"];
       const methodPromises = invalidMethods.map(method => {
         return request(app)
-          [method]("/api/articles/34")
+        [method]("/api/articles/34")
           .expect(405)
           .then(({ body: { msg } }) => {
             expect(msg).to.equal("Method Not Allowed");
@@ -177,6 +177,16 @@ describe("API testing", () => {
         .then(({ body: { msg } }) => {
           expect(msg).to.equal(
             "Bad Request - must only contain inc_votes values"
+          );
+        });
+    });
+    it("ERROR returns a status 400 when no body is sent", () => {
+      return request(app)
+        .patch("/api/articles/1")
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal(
+            "Bad Request - inc_votes missing from request body"
           );
         });
     });
@@ -287,11 +297,19 @@ describe("API testing", () => {
           expect(msg).to.equal("Bad Request - Invalid key supplied");
         });
     });
+    it("ERROR - returns a status 400 and an error message when no body is supplied", () => {
+      return request(app)
+        .post("/api/articles/1/comments")
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal("Bad Request - username and body required");
+        });
+    });
     it('ERROR - gives a 405 status and "Method Not Allowed" when attempting to patch, put or delete comments', () => {
       const invalidMethods = ["patch", "put", "delete"];
       const methodPromises = invalidMethods.map(method => {
         return request(app)
-          [method]("/api/articles/1/comments")
+        [method]("/api/articles/1/comments")
           .expect(405)
           .then(({ body: { msg } }) => {
             expect(msg).to.equal("Method Not Allowed");
@@ -300,7 +318,7 @@ describe("API testing", () => {
       return Promise.all(methodPromises);
     });
   });
-  describe.only("GET /api/articles/:article_id/comments", () => {
+  describe("GET /api/articles/:article_id/comments", () => {
     it("returns a status 200 and an array of comments with the correct keys", () => {
       return request(app)
         .get("/api/articles/1/comments")
@@ -373,23 +391,31 @@ describe("API testing", () => {
           expect(msg).to.equal("Article or Comments Not Found");
         });
     });
+    it("ERROR - returns a 400 error when sorted by an invalid column", () => {
+      return request(app)
+        .get("/api/articles/1/comments?sort_by=invalid-column")
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal('column "invalid-column" does not exist');
+        });
+    });
+    it("ERROR - returns a 400 error when ordered by an invalid value", () => {
+      return request(app)
+        .get("/api/articles/1/comments?order=invaid-input")
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal("Invalid sort order");
+        });
+    });
   });
-  it("ERROR - returns a 400 error when sorted by an invalid column", () => {
-    return request(app)
-      .get("/api/articles/1/comments?sort_by=invalid-column")
-      .expect(400)
-      .then(({ body: { msg } }) => {
-        expect(msg).to.equal('column "invalid-column" does not exist');
-      });
-  });
-  it("ERROR - returns a 400 error when ordered by an invalid value", () => {
-    return request(app)
-      .get("/api/articles/1/comments?order=invaid-input")
-      .expect(400)
-      .then(({ body: { msg } }) => {
-        expect(msg).to.equal("Invalid sort order");
-      });
-  });
+  describe('GET /api/articles', () => {
+    it('returns a 200 status and an array of article objects with the correct keys', () => {
+      return request(app)
+        .get('/api/articles')
+        .expect(200)
+        .then(({ body: { articles } }).to.contain.keys('author', 'title', 'article_id', 'topic', 'created_ay', 'votes'))
+    })
+  })
   describe("ERROR/not-a-route", () => {
     it('gives a 404 erorr and "Route Not Found" when using a route that does not exist', () => {
       return request(app)

@@ -91,7 +91,7 @@ const selectCommentsByArticleID = (
   }
 };
 
-const selectArticles = ({ sort_by = 'created_at', order }) => {
+const selectArticles = ({ sort_by = 'created_at', order, author, topic }) => {
   return connection
     .select('articles.author',
       'title',
@@ -104,6 +104,10 @@ const selectArticles = ({ sort_by = 'created_at', order }) => {
     .leftJoin('comments', 'articles.article_id', 'comments.article_id')
     .groupBy('articles.article_id')
     .orderBy(sort_by, order || 'desc')
+    .modify((query) => {
+      if (author) query.where({ 'articles.author': author })
+      if (topic) query.where({ topic })
+    })
 }
 
 module.exports = {

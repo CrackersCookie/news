@@ -458,6 +458,24 @@ describe("API testing", () => {
           expect(articles).to.be.descendingBy("created_at");
         });
     });
+    it("returns a 200 and filters the articles by username specified in a author query", () => {
+      return request(app)
+        .get("/api/articles?author=butter_bridge")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(articles.every(article => article.author === 'butter_bridge')).to.be.true;
+          expect(articles.length).to.equal(3)
+        });
+    });
+    it("returns a 200 and filters the articles by topic specified in a topic query", () => {
+      return request(app)
+        .get("/api/articles?topic=cats")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(articles.every(article => article.topic === 'cats')).to.be.true;
+          expect(articles.length).to.equal(1)
+        });
+    });
   })
   describe("ERROR/not-a-route", () => {
     it('gives a 404 erorr and "Route Not Found" when using a route that does not exist', () => {

@@ -8,7 +8,10 @@ const {
 } = require("../controllers/articles");
 const { methodNotFound } = require("../errors/errors");
 
-articlesRouter.route('/').get(sendArticles).all(methodNotFound);
+articlesRouter
+  .route("/")
+  .get(sendArticles)
+  .all(methodNotFound);
 
 articlesRouter
   .route("/:article_id")

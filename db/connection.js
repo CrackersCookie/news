@@ -1,4 +1,4 @@
-const dbConfig = require('../knexfile')
-const connection = require('knex')(dbConfig)
+const dbConfig = require("../knexfile");
+const connection = require("knex")(dbConfig);
 
-module.exports = connection
+module.exports = connection;

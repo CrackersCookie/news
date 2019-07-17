@@ -12,7 +12,6 @@ exports.customErrors = (err, req, res, next) => {
 };
 
 exports.sqlErrors = (err, req, res, next) => {
-  // console.log(err);
   if (err.code === "22P02") {
     res.status(400).send({ msg: err.message.split(" - ")[1] });
   }
@@ -21,10 +20,10 @@ exports.sqlErrors = (err, req, res, next) => {
   }
   if (err.code === "23503") {
     res.status(404).send({ msg: "Not Found" });
-  } else next(err);
+  };
 };
 
 exports.InternalErrors = (err, req, res, next) => {
-  // console.log(err)
+  console.log(err)
   res.status(500).send({ msg: "InternalErrors" });
 };

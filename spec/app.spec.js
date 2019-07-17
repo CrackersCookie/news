@@ -408,7 +408,7 @@ describe("API testing", () => {
         });
     });
   });
-  describe.only('GET /api/articles', () => {
+  describe('GET /api/articles', () => {
     it('returns a 200 status and an array of all the article objects with the correct keys', () => {
       return request(app)
         .get('/api/articles')
@@ -475,6 +475,49 @@ describe("API testing", () => {
           expect(articles.every(article => article.topic === 'cats')).to.be.true;
           expect(articles.length).to.equal(1)
         });
+    });
+    it("ERROR - returns a 400 error when sorted by an invalid column", () => {
+      return request(app)
+        .get("/api/articles?sort_by=invalid-column")
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal('column "invalid-column" does not exist');
+        });
+    });
+    it("ERROR - returns a 400 error when ordered by an invalid value", () => {
+      return request(app)
+        .get("/api/articles?order=invaid-input")
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal("Invalid sort order");
+        });
+    });
+    it("ERROR - returns a 404 error when an author is not found", () => {
+      return request(app)
+        .get("/api/articles?author=mickey-mouse")
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal("Not Found");
+        });
+    });
+    it("ERROR - returns a 404 error when an author is not found", () => {
+      return request(app)
+        .get("/api/articles?topic=disney-films")
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal("Not Found");
+        });
+    });
+    it('ERROR - gives a 405 status and "Method Not Allowed" when attempting to post, patch, put or delete topics', () => {
+      const invalidMethods = ["post", "patch", "put", "delete"];
+      const methodPromises = invalidMethods.map(method => {
+        return request(app)
+        [method]("/api/articles")
+          .expect(405)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal("Method Not Allowed");
+          });
+      });
     });
   })
   describe("ERROR/not-a-route", () => {

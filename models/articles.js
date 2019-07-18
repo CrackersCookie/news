@@ -47,11 +47,40 @@ const selectArticles = ({ sort_by = "created_at", order = "desc", author, topic 
         if (topic) query.where({ topic });
       })
       .then(articles => {
-        if (!articles.length) return Promise.reject({ status: 404, msg: "Not Found" });
-        else return articles;
-      });
+        let articlesPresent = true;
+        if (!articles.length) {
+          if (author) articlesPresent = selectUserByID(author)
+          if (topic) articlesPresent = selectTopic(topic)
+        }
+        return Promise.all([articles, articlesPresent]);
+      })
+      .then(([articles, articlesPresent]) => {
+        if (articlesPresent) return articles;
+      })
   } else return Promise.reject({ status: 400, msg: "Invalid sort order" });
 };
+
+const selectUserByID = (author) => {
+  return connection
+    .select('username')
+    .from('users')
+    .where({ "username": author })
+    .then((user) => {
+      if (!user.length) return Promise.reject({ status: 404, msg: "User Not Found" });
+      else return true;
+    })
+}
+
+const selectTopic = (topic) => {
+  return connection
+    .select('slug')
+    .from('topics')
+    .where({ "slug": topic })
+    .then((topic) => {
+      if (!topic.length) return Promise.reject({ status: 404, msg: "Topic Not Found" });
+      else return true;
+    })
+}
 
 const selectarticleByID = (article_id) => {
   return connection
@@ -59,7 +88,6 @@ const selectarticleByID = (article_id) => {
     .from('articles')
     .where({ article_id })
     .then((article) => {
-      console.log(article)
       if (!article.length) return false;
       else return true;
     })

@@ -475,6 +475,14 @@ describe("API testing", () => {
           expect(articles.length).to.equal(3)
         });
     });
+    it("returns a status 200 and an empty array if passed a user that exists but has no articles", () => {
+      return request(app)
+        .get("/api/articles?author=lurker")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(articles).to.eql([])
+        });
+    });
     it("returns a status 200 and filters the articles by topic specified in a topic query", () => {
       return request(app)
         .get("/api/articles?topic=cats")
@@ -506,16 +514,15 @@ describe("API testing", () => {
           .get("/api/articles?author=mickey-mouse")
           .expect(404)
           .then(({ body: { msg } }) => {
-            expect(msg).to.equal("Not Found");
+            expect(msg).to.equal("User Not Found");
           });
       });
-      // Add test here for existing author
-      it("ERROR - returns a 404 error when an author is not found", () => {
+      it("ERROR - returns a 404 error when an topic is not found", () => {
         return request(app)
           .get("/api/articles?topic=disney-films")
           .expect(404)
           .then(({ body: { msg } }) => {
-            expect(msg).to.equal("Not Found");
+            expect(msg).to.equal("Topic Not Found");
           });
       });
       it('ERROR - gives a 405 status and "Method Not Allowed" when attempting to post, patch, put or delete topics', () => {

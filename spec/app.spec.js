@@ -324,7 +324,7 @@ describe("API testing", () => {
       });
     });
   });
-  describe.only("GET /api/articles/:article_id/comments", () => {
+  describe("GET /api/articles/:article_id/comments", () => {
     it("returns a status 200 and an array of comments with the correct keys", () => {
       return request(app)
         .get("/api/articles/1/comments")
@@ -371,7 +371,7 @@ describe("API testing", () => {
           expect(comments).to.be.descendingBy("created_at");
         });
     });
-    it.only("returns a 200 status when passed an article_id that has no comments but is valid and serves an empty array", () => {
+    it("returns a 200 status when passed an article_id that has no comments but is valid and serves an empty array", () => {
       return request(app)
         .get("/api/articles/10/comments")
         .expect(200)
@@ -385,7 +385,7 @@ describe("API testing", () => {
           .get("/api/articles/9999/comments")
           .expect(404)
           .then(({ body: { msg } }) => {
-            expect(msg).to.equal("Article or Comments Not Found");
+            expect(msg).to.equal("Article Not Found");
           });
       });
       it("ERROR - returns a 400 and Bad Request message when passed an article_id that is invalid", () => {

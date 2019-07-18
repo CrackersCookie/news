@@ -663,7 +663,7 @@ describe("API testing", () => {
       });
     });
   });
-  describe('"GET /api"', () => {
+  describe('GET /api', () => {
     it('returns a status 200 and an object with the API spec', () => {
       return request(app)
         .get('/api/')

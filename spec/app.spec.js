@@ -155,18 +155,24 @@ describe("API testing", () => {
           expect(votes).to.equal(99);
         });
     });
+    it('returns a status 200 when sent an empty request body with no "inc_votes" value on it and returns the article with the votes unchanged', () => {
+      return request(app)
+        .patch("/api/articles/1")
+        .send({})
+        .expect(200)
+        .then(({ body: { article: { votes } } }) => {
+          expect(votes).to.equal(100);
+        });
+    });
+    it("returns a status 200 when no body is sent and returns the article with the votes unchanged", () => {
+      return request(app)
+        .patch("/api/articles/1")
+        .expect(200)
+        .then(({ body: { article: { votes } } }) => {
+          expect(votes).to.equal(100);
+        });
+    });
     describe('Error handling', () => {
-      it('ERROR returns a status 400 when sent an empty request body with no "inc_votes" value on it', () => {
-        return request(app)
-          .patch("/api/articles/1")
-          .send({})
-          .expect(400)
-          .then(({ body: { msg } }) => {
-            expect(msg).to.equal(
-              "Bad Request - inc_votes missing from request body"
-            );
-          });
-      });
       it('ERROR returns a status 400 when sent a patch with an invalid "inc_votes" value', () => {
         return request(app)
           .patch("/api/articles/1")
@@ -184,16 +190,6 @@ describe("API testing", () => {
           .then(({ body: { msg } }) => {
             expect(msg).to.equal(
               "Bad Request - must only contain inc_votes values"
-            );
-          });
-      });
-      it("ERROR returns a status 400 when no body is sent", () => {
-        return request(app)
-          .patch("/api/articles/1")
-          .expect(400)
-          .then(({ body: { msg } }) => {
-            expect(msg).to.equal(
-              "Bad Request - inc_votes missing from request body"
             );
           });
       });
@@ -328,7 +324,7 @@ describe("API testing", () => {
       });
     });
   });
-  describe("GET /api/articles/:article_id/comments", () => {
+  describe.only("GET /api/articles/:article_id/comments", () => {
     it("returns a status 200 and an array of comments with the correct keys", () => {
       return request(app)
         .get("/api/articles/1/comments")
@@ -375,6 +371,14 @@ describe("API testing", () => {
           expect(comments).to.be.descendingBy("created_at");
         });
     });
+    it.only("returns a 200 status when passed an article_id that has no comments but is valid and serves an empty array", () => {
+      return request(app)
+        .get("/api/articles/10/comments")
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          expect(comments).to.eql([]);
+        });
+    });
     describe('', () => {
       it("ERROR - returns a 404 and article not found message when passed an article_id that does not exist", () => {
         return request(app)
@@ -392,14 +396,6 @@ describe("API testing", () => {
             expect(msg).to.equal(
               'invalid input syntax for integer: "string-not-an-integer"'
             );
-          });
-      });
-      it("ERROR - returns a 404 and Not Found message when passed an article_id that has no comments but is valid", () => {
-        return request(app)
-          .get("/api/articles/10/comments")
-          .expect(404)
-          .then(({ body: { msg } }) => {
-            expect(msg).to.equal("Article or Comments Not Found");
           });
       });
       it("ERROR - returns a 400 error when sorted by an invalid column", () => {
@@ -562,18 +558,24 @@ describe("API testing", () => {
           expect(votes).to.equal(6);
         });
     });
+    it('returns a status 200 when sent an empty request body with no "inc_votes" value on it and returns the comment unchanged', () => {
+      return request(app)
+        .patch("/api/comments/1")
+        .send({})
+        .expect(200)
+        .then(({ body: { comment: { votes } } }) => {
+          expect(votes).to.equal(16);
+        });
+    });
+    it("ERROR returns a status 200 when no body is sent", () => {
+      return request(app)
+        .patch("/api/comments/1")
+        .expect(200)
+        .then(({ body: { comment: { votes } } }) => {
+          expect(votes).to.equal(16);
+        });
+    })
     describe('Error handling', () => {
-      it('ERROR returns a status 400 when sent an empty request body with no "inc_votes" value on it', () => {
-        return request(app)
-          .patch("/api/comments/1")
-          .send({})
-          .expect(400)
-          .then(({ body: { msg } }) => {
-            expect(msg).to.equal(
-              "Bad Request - inc_votes missing from request body"
-            );
-          });
-      });
       it('ERROR returns a status 400 when sent a patch with an invalid "inc_votes" value', () => {
         return request(app)
           .patch("/api/comments/1")
@@ -591,16 +593,6 @@ describe("API testing", () => {
           .then(({ body: { msg } }) => {
             expect(msg).to.equal(
               "Bad Request - must only contain inc_votes values"
-            );
-          });
-      });
-      it("ERROR returns a status 400 when no body is sent", () => {
-        return request(app)
-          .patch("/api/comments/1")
-          .expect(400)
-          .then(({ body: { msg } }) => {
-            expect(msg).to.equal(
-              "Bad Request - inc_votes missing from request body"
             );
           });
       });

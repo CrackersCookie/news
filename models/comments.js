@@ -30,11 +30,12 @@ const selectCommentsByArticleID = ({ article_id }, { sort_by, order = "desc" }) 
 };
 
 const updatecommentByID = ({ comment_id }, body) => {
-  if (!body.inc_votes) return Promise.reject({ status: 400, msg: "Bad Request - inc_votes missing from request body" });
-  else if (Object.keys(body).length > 1)
+  let { inc_votes } = body
+  if (!inc_votes) inc_votes = 0;
+  if (Object.keys(body).length > 1)
     return Promise.reject({ status: 400, msg: "Bad Request - must only contain inc_votes values" });
 
-  const votes = body.inc_votes;
+  const votes = inc_votes;
   return connection
     .increment({ votes })
     .from("comments")

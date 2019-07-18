@@ -53,8 +53,21 @@ const selectArticles = ({ sort_by = "created_at", order = "desc", author, topic 
   } else return Promise.reject({ status: 400, msg: "Invalid sort order" });
 };
 
+const selectarticleByID = (article_id) => {
+  return connection
+    .select('article_id')
+    .from('articles')
+    .where({ article_id })
+    .then((article) => {
+      console.log(article)
+      if (!article.length) return false;
+      else return true;
+    })
+}
+
 module.exports = {
   selectArticleByID,
   updateArticleVotesByID,
-  selectArticles
+  selectArticles,
+  selectarticleByID
 };

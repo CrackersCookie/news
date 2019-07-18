@@ -1,4 +1,5 @@
 const connection = require("../db/connection");
+const { selectarticleByID } = require('./articles')
 
 const insertCommentByArticleID = ({ article_id }, reqBody) => {
   const { username, body } = reqBody;
@@ -18,22 +19,18 @@ const insertCommentByArticleID = ({ article_id }, reqBody) => {
 const selectCommentsByArticleID = ({ article_id }, { sort_by, order = "desc" }) => {
   if (order === "asc" || order === "desc") {
     return connection
-      .select('article_id')
-      .from('articles')
+      .select("comment_id", "votes", "created_at", "author", "body")
+      .from("comments")
       .where({ article_id })
-      .then(article => {
-        if (!article.length) return Promise.reject({ status: 404, msg: "Article Not Found" });
-        return article;
+      .orderBy(sort_by || "created_at", order)
+      .then(comments => {
+        let commentsPresent = true;
+        if (!comments.length) commentsPresent = selectarticleByID(article_id)
+        return Promise.all([comments, commentsPresent])
       })
-      .then(() => {
-        return connection
-          .select("comment_id", "votes", "created_at", "author", "body")
-          .from("comments")
-          .where({ article_id })
-          .orderBy(sort_by || "created_at", order)
-          .then(comments => {
-            return comments;
-          });
+      .then(([comments, commentsPresent]) => {
+        if (commentsPresent) return comments;
+        else return Promise.reject({ status: 404, msg: "Article Not Found" });
       })
   } else return Promise.reject({ status: 400, msg: "Invalid sort order" })
 };

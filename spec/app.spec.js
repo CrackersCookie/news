@@ -509,6 +509,7 @@ describe("API testing", () => {
             expect(msg).to.equal("Not Found");
           });
       });
+      // Add test here for existing author
       it("ERROR - returns a 404 error when an author is not found", () => {
         return request(app)
           .get("/api/articles?topic=disney-films")

@@ -663,6 +663,39 @@ describe("API testing", () => {
       });
     });
   });
+  describe('"GET /api"', () => {
+    it('returns a status 200 and an object with the API spec', () => {
+      return request(app)
+        .get('/api/')
+        .expect(200)
+        .then(({ body }) => {
+          expect(body).to.contain.keys("GET /api",
+            "GET /api/topics",
+            "GET /api/articles",
+            "GET /api/users/:username",
+            "GET /api/articles/:article_id",
+            "PATCH /api/articles/:article_id",
+            "GET /api/articles/:article_id/comments",
+            "POST /api/articles/:article_id/comments",
+            "PATCH /api/comments/:comment_id",
+            "DELETE /api/comments/:comment_id")
+        })
+    });
+    describe('Error handling', () => {
+      it('ERROR - gives a 405 status and "Method Not Allowed" when attempting to post, patch, put or delete', () => {
+        const invalidMethods = ["post", "patch", "put", "delete"];
+        const methodPromises = invalidMethods.map(method => {
+          return request(app)
+          [method]("/api")
+            .expect(405)
+            .then(({ body: { msg } }) => {
+              expect(msg).to.equal("Method Not Allowed");
+            });
+        });
+        return Promise.all(methodPromises);
+      });
+    });
+  });
   describe("ERROR/not-a-route", () => {
     it('gives a 404 erorr and "Route Not Found" when using a route that does not exist', () => {
       return request(app)

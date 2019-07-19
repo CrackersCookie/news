@@ -492,11 +492,29 @@ describe("API testing", () => {
       });
     });
   });
-  describe.only('DELETE /api/articles/:article_id', () => {
+  describe('DELETE /api/articles/:article_id', () => {
     it('returns a status 204 deleting the article from the database', () => {
       return request(app)
         .delete('/api/articles/1')
         .expect(204)
+    });
+    describe('Error handling', () => {
+      it('ERROR returns a status 404 when attempting to delete an article that does not exist', () => {
+        return request(app)
+          .delete('/api/articles/9999')
+          .expect(404)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal('Article Not Found')
+          })
+      })
+      it('ERROR returns a status 400 when attempting to delete an article that does not exist', () => {
+        return request(app)
+          .delete('/api/articles/not-a-valid-id')
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal('invalid input syntax for integer: "not-a-valid-id"')
+          })
+      });
     });
   });
   describe('GET /api/articles', () => {

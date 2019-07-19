@@ -61,7 +61,7 @@ const removeArticleByID = (req, res, next) => {
   deleteArticleByID(req.params)
     .then(() => {
       res.sendStatus(204)
-    })
+    }).catch(next)
 }
 
 module.exports = {

@@ -958,7 +958,7 @@ describe("API testing", () => {
             );
           });
       });
-      it("ERROR - returns a status 400 when article body is not supplied", () => {
+      it("ERROR - returns a status 400 when article topic is not supplied", () => {
         return request(app)
           .post("/api/articles/")
           .send({ title: 'Test Title', author: "butter_bridge", body: "article text goes here" })
@@ -987,7 +987,7 @@ describe("API testing", () => {
             expect(msg).to.equal('Additional fields are not permitted - only title, author, body and topic are required')
           });
       });
-      it("ERROR - returns a status 404 when the author is invalid", () => {
+      it("ERROR - returns a status 404 when the author does not exist", () => {
         return request(app)
           .post("/api/articles/")
           .send({ author: "butter_bridges", title: "Test Title", body: "article text goes here", topic: 'cats' })
@@ -998,7 +998,7 @@ describe("API testing", () => {
             );
           });
       });
-      it("ERROR - returns a status 404 when the topic is invalid", () => {
+      it("ERROR - returns a status 404 when the topic does not exist", () => {
         return request(app)
           .post("/api/articles/")
           .send({ author: "butter_bridge", title: "Test Title", body: "article text goes here", topic: 'catz' })
@@ -1024,6 +1024,52 @@ describe("API testing", () => {
           );
           expect(topic.slug).to.equal('Marvel Movies');
         });
+    });
+    describe('Error handling', () => {
+      it("ERROR - returns a status 400 when slug is not supplied", () => {
+        return request(app)
+          .post("/api/topics/")
+          .send({ description: "The best movies" })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal(
+              'null value in column "slug" violates not-null constraint'
+            );
+          });
+      });
+      it("ERROR - returns a status 400 when description is not supplied", () => {
+        return request(app)
+          .post("/api/topics/")
+          .send({ slug: "Marvel Movies" })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal(
+              'null value in column "description" violates not-null constraint'
+            );
+          });
+      });
+      it("ERROR - returns a status 400 when extra keys are supplied on the POST", () => {
+        return request(app)
+          .post("/api/topics/")
+          .send({ slug: "Marvel Movies", description: "The best movies", topic_id: 3 })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal(
+              'column "topic_id" of relation "topics" does not exist'
+            );
+          });
+      });
+      it("ERROR - returns a status 400 when an existing topic is posted", () => {
+        return request(app)
+          .post("/api/topics/")
+          .send({ slug: "cats", description: "The best movies" })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal(
+              'duplicate key value violates unique constraint "topics_pkey"'
+            );
+          });
+      });
     });
   });
   describe("ERROR/not-a-route", () => {

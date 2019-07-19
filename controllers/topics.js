@@ -13,7 +13,7 @@ const postTopic = (req, res, next) => {
   insertTopic(body)
     .then(topic => {
       res.status(201).send({ topic });
-    })
+    }).catch(next)
 }
 
 module.exports = { sendTopics, postTopic };

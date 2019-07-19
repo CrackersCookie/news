@@ -12,7 +12,7 @@ exports.customErrors = (err, req, res, next) => {
 };
 
 exports.sqlErrors = (err, req, res, next) => {
-  const sqlErrorCodes = ["22P02", "42703", "23502", "2201X"];
+  const sqlErrorCodes = ["22P02", "42703", "23502", "2201X", "23505"];
   if (sqlErrorCodes.includes(err.code)) {
     res.status(400).send({ msg: err.message.split(" - ")[1] });
   }
@@ -22,5 +22,6 @@ exports.sqlErrors = (err, req, res, next) => {
 };
 
 exports.InternalErrors = (err, req, res, next) => {
+  // console.log(err)
   res.status(500).send({ msg: "Internal Server Error" });
 };

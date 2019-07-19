@@ -33,7 +33,7 @@ const updateArticleVotesByID = ({ article_id }, body) => {
   }
 };
 
-const selectArticles = ({ sort_by = "created_at", order = "desc", author, topic }) => {
+const selectArticles = ({ sort_by = "created_at", order = "desc", author, topic, limit = 10 }) => {
   if (order === "asc" || order === "desc") {
     return connection
       .select("articles.author", "title", "articles.article_id", "topic", "articles.created_at", "articles.votes")
@@ -45,6 +45,7 @@ const selectArticles = ({ sort_by = "created_at", order = "desc", author, topic 
       .modify(query => {
         if (author) query.where({ "articles.author": author });
         if (topic) query.where({ topic });
+        if (limit) query.limit(limit)
       })
       .then(articles => {
         let articlesPresent = true;

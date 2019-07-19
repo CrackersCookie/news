@@ -416,14 +416,13 @@ describe("API testing", () => {
       });
     });
   });
-  describe('GET /api/articles', () => {
+  describe.only('GET /api/articles', () => {
     it('returns a 200 status and an array of all the article objects with the correct keys', () => {
       return request(app)
         .get('/api/articles')
         .expect(200)
         .then(({ body: { articles } }) => {
           expect(articles[0]).to.contain.keys('author', 'title', 'article_id', 'topic', 'created_at', 'votes')
-          expect(articles.length).to.equal(12)
         })
     })
     it('returns a 200 status and each article has a key of comment_count', () => {
@@ -491,6 +490,33 @@ describe("API testing", () => {
           expect(articles.every(article => article.topic === 'cats')).to.be.true;
           expect(articles.length).to.equal(1)
         });
+    });
+    it("returns a status 200 and reutns an empty array when there are no articles on the topic", () => {
+      return request(app)
+        .get("/api/articles?topic=paper")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(articles.every(article => article.topic === 'cats')).to.be.true;
+          expect(articles).to.eql([])
+        });
+    });
+    describe('Pagination - limit, page and total_count', () => {
+      it('returns a 200 status taking a query - limit - which limits the number of responses served', () => {
+        return request(app)
+          .get("/api/articles?limit=5")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles.length).to.equal(5)
+          });
+      });
+      it('returns a 200 status and limits the response to 10 result by default', () => {
+        return request(app)
+          .get("/api/articles")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles.length).to.equal(10)
+          });
+      });
     });
     describe('Error handling', () => {
       it("ERROR - returns a 400 error when sorted by an invalid column", () => {

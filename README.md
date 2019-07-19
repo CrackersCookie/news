@@ -101,7 +101,7 @@ You can also create you own live version and deploy it on Heroku, instructions h
 * Express - https://expressjs.com/
 * Knex - https://knexjs.org/
 * PostgreSQL - https://node-postgres.com/
-* Heroku* - https://devcenter.heroku.com/articles/getting-started-with-nodejs
+* Heroku - https://devcenter.heroku.com/articles/getting-started-with-nodejs
 
 ### Author
 

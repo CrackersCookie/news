@@ -33,7 +33,6 @@ const updateArticleVotesByID = ({ article_id }, body) => {
   }
 };
 
-
 const selectArticles = ({ sort_by = "created_at", order = "desc", author, topic, limit = 10, p }) => {
   if (!Number(limit) || limit < 0) return Promise.reject({ status: 400, msg: "Limit must be a positive number" })
   if (p && !Number(p) || p && p < 0) return Promise.reject({ status: 400, msg: "p must be a positive number" })
@@ -114,9 +113,18 @@ const selectarticleByID = (article_id) => {
     })
 }
 
+const insertArticle = (postBody) => {
+  return connection
+    .insert(postBody)
+    .into("articles")
+    .returning("*")
+    .then(article => article[0]);
+}
+
 module.exports = {
   selectArticleByID,
   updateArticleVotesByID,
   selectArticles,
-  selectarticleByID
+  selectarticleByID,
+  insertArticle
 };

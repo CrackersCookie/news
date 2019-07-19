@@ -17,6 +17,8 @@ const insertCommentByArticleID = ({ article_id }, reqBody) => {
 };
 
 const selectCommentsByArticleID = ({ article_id }, { sort_by, order = "desc", limit = 10, p }) => {
+  if (!Number(limit) || limit < 0) return Promise.reject({ status: 400, msg: "Limit must be a positive number" })
+  if (p && !Number(p) || p && p < 0) return Promise.reject({ status: 400, msg: "p must be a positive number" })
   if (order === "asc" || order === "desc") {
     return connection
       .select("comment_id", "votes", "created_at", "author", "body")

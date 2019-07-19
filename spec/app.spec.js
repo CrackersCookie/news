@@ -415,7 +415,7 @@ describe("API testing", () => {
           });
       });
     });
-    describe.only('Pagination - limit, page and total_count', () => {
+    describe('Pagination - limit, page and total_count', () => {
       it('returns a 200 status taking a query - limit - which limits the number of comments served', () => {
         return request(app)
           .get("/api/articles/1/comments?limit=5")
@@ -447,6 +447,48 @@ describe("API testing", () => {
           .then(({ body: { comments } }) => {
             expect(comments).to.eql([])
           });
+      });
+      describe('Error handling - Pagination', () => {
+        it("ERROR - returns a 400 error when limit is passed a string", () => {
+          return request(app)
+            .get("/api/articles/1/comments?limit=invaid-input")
+            .expect(400)
+            .then(({ body: { msg } }) => {
+              expect(msg).to.equal("Limit must be a positive number");
+            });
+        });
+        it("ERROR - returns a 400 error when limit is passed a negative number", () => {
+          return request(app)
+            .get("/api/articles/1/comments?limit=-2")
+            .expect(400)
+            .then(({ body: { msg } }) => {
+              expect(msg).to.equal("Limit must be a positive number");
+            });
+        });
+        it("ERROR - returns a 400 error when the page query is passed a string", () => {
+          return request(app)
+            .get("/api/articles/1/comments?p=invaid-input")
+            .expect(400)
+            .then(({ body: { msg } }) => {
+              expect(msg).to.equal("p must be a positive number");
+            });
+        });
+        it("ERROR - returns a 400 error when the page query is passed a negative number", () => {
+          return request(app)
+            .get("/api/articles/1/comments?p=-2")
+            .expect(400)
+            .then(({ body: { msg } }) => {
+              expect(msg).to.equal("p must be a positive number");
+            });
+        });
+        it("ERROR - returns a 400 error when the page query is passed 0", () => {
+          return request(app)
+            .get("/api/articles/1/comments?p=0")
+            .expect(400)
+            .then(({ body: { msg } }) => {
+              expect(msg).to.equal("p must be a positive number");
+            });
+        });
       });
     });
   });
@@ -838,14 +880,34 @@ describe("API testing", () => {
       });
     });
   });
-  describe("ERROR/not-a-route", () => {
-    it('gives a 404 erorr and "Route Not Found" when using a route that does not exist', () => {
+  describe.only("POST /api/articles", () => {
+    it("returns a status 201 when posting a new article, returns the posted article", () => {
       return request(app)
-        .get("/api/not-a-route")
-        .expect(404)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal("Route Not Found");
+        .post("/api/articles")
+        .send({ title: 'Test Title', author: "butter_bridge", body: "article text goes here", topic: 'cats' })
+        .expect(201)
+        .then(({ body: { article } }) => {
+          expect(article).to.have.keys(
+            "article_id",
+            "author",
+            "title",
+            "body",
+            "created_at",
+            "votes",
+            "topic"
+          );
+          expect(article.title).to.equal('Test Title');
         });
     });
+});
+describe("ERROR/not-a-route", () => {
+  it('gives a 404 erorr and "Route Not Found" when using a route that does not exist', () => {
+    return request(app)
+      .get("/api/not-a-route")
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).to.equal("Route Not Found");
+      });
   });
+});
 });

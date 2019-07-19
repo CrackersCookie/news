@@ -4,13 +4,14 @@ const {
   editArticleByID,
   postCommentByArticleID,
   sendCommentsByArticleID,
-  sendArticles
+  sendArticles,
+  postArticle
 } = require("../controllers/articles");
 const { methodNotFound } = require("../errors/errors");
 
 articlesRouter
   .route("/")
-  .get(sendArticles)
+  .get(sendArticles).post(postArticle)
   .all(methodNotFound);
 
 articlesRouter

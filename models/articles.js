@@ -114,6 +114,7 @@ const selectarticleByID = (article_id) => {
 }
 
 const insertArticle = (postBody) => {
+  if (Object.keys(postBody).length > 4) return Promise.reject({ status: 400, msg: "Additional fields are not permitted - only title, author, body and topic are required" })
   return connection
     .insert(postBody)
     .into("articles")

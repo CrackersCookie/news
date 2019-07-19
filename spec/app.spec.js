@@ -610,7 +610,7 @@ describe("API testing", () => {
           });
       });
       it('ERROR - gives a 405 status and "Method Not Allowed" when attempting to post, patch, put or delete topics', () => {
-        const invalidMethods = ["post", "patch", "put", "delete"];
+        const invalidMethods = ["patch", "put", "delete"];
         const methodPromises = invalidMethods.map(method => {
           return request(app)
           [method]("/api/articles")
@@ -880,7 +880,7 @@ describe("API testing", () => {
       });
     });
   });
-  describe.only("POST /api/articles", () => {
+  describe("POST /api/articles", () => {
     it("returns a status 201 when posting a new article, returns the posted article", () => {
       return request(app)
         .post("/api/articles")
@@ -899,15 +899,101 @@ describe("API testing", () => {
           expect(article.title).to.equal('Test Title');
         });
     });
-});
-describe("ERROR/not-a-route", () => {
-  it('gives a 404 erorr and "Route Not Found" when using a route that does not exist', () => {
-    return request(app)
-      .get("/api/not-a-route")
-      .expect(404)
-      .then(({ body: { msg } }) => {
-        expect(msg).to.equal("Route Not Found");
+    describe('Error handling', () => {
+      it("ERROR - returns a status 400 when article title is not supplied", () => {
+        return request(app)
+          .post("/api/articles/")
+          .send({ author: "butter_bridge", body: "article text goes here", topic: 'cats' })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal(
+              'null value in column "title" violates not-null constraint'
+            );
+          });
       });
+      it("ERROR - returns a status 400 when article author is not supplied", () => {
+        return request(app)
+          .post("/api/articles/")
+          .send({ title: 'Test Title', body: "article text goes here", topic: 'cats' })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal(
+              'null value in column "author" violates not-null constraint'
+            );
+          });
+      });
+      it("ERROR - returns a status 400 when article body is not supplied", () => {
+        return request(app)
+          .post("/api/articles/")
+          .send({ title: 'Test Title', author: "butter_bridge", topic: 'cats' })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal(
+              'null value in column "body" violates not-null constraint'
+            );
+          });
+      });
+      it("ERROR - returns a status 400 when article body is not supplied", () => {
+        return request(app)
+          .post("/api/articles/")
+          .send({ title: 'Test Title', author: "butter_bridge", body: "article text goes here" })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal(
+              'null value in column "topic" violates not-null constraint'
+            );
+          });
+      });
+      it("ERROR - returns a status 400 when invalid columns are supplied", () => {
+        return request(app)
+          .post("/api/articles")
+          .send({ title: 'Test Title', author: "butter_bridge", body: "article text goes here", topic: 'cats', humour_index: 0 })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal('Additional fields are not permitted - only title, author, body and topic are required');
+          });
+      });
+      it("ERROR - returns a status 400 when the user attempts to add votes", () => {
+        return request(app)
+          .post("/api/articles")
+          .send({ title: 'Test Title', author: "butter_bridge", body: "article text goes here", topic: 'cats', votes: 0 })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal('Additional fields are not permitted - only title, author, body and topic are required')
+          });
+      });
+      it("ERROR - returns a status 404 when the author is invalid", () => {
+        return request(app)
+          .post("/api/articles/")
+          .send({ author: "butter_bridges", title: "Test Title", body: "article text goes here", topic: 'cats' })
+          .expect(404)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal(
+              'Not Found'
+            );
+          });
+      });
+      it("ERROR - returns a status 404 when the topic is invalid", () => {
+        return request(app)
+          .post("/api/articles/")
+          .send({ author: "butter_bridge", title: "Test Title", body: "article text goes here", topic: 'catz' })
+          .expect(404)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal(
+              'Not Found'
+            );
+          });
+      });
+    });
   });
-});
+  describe("ERROR/not-a-route", () => {
+    it('gives a 404 erorr and "Route Not Found" when using a route that does not exist', () => {
+      return request(app)
+        .get("/api/not-a-route")
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).to.equal("Route Not Found");
+        });
+    });
+  });
 });

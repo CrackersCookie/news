@@ -5,7 +5,8 @@ const {
   postCommentByArticleID,
   sendCommentsByArticleID,
   sendArticles,
-  postArticle
+  postArticle,
+  removeArticleByID
 } = require("../controllers/articles");
 const { methodNotFound } = require("../errors/errors");
 
@@ -18,6 +19,7 @@ articlesRouter
   .route("/:article_id")
   .get(sendArticleByID)
   .patch(editArticleByID)
+  .delete(removeArticleByID)
   .all(methodNotFound);
 
 articlesRouter

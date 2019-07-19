@@ -492,6 +492,13 @@ describe("API testing", () => {
       });
     });
   });
+  describe.only('DELETE /api/articles/:article_id', () => {
+    it('returns a status 204 deleting the article from the database', () => {
+      return request(app)
+        .delete('/api/articles/1')
+        .expect(204)
+    });
+  });
   describe('GET /api/articles', () => {
     it('returns a 200 status and an array of all the article objects with the correct keys', () => {
       return request(app)

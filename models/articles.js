@@ -122,10 +122,22 @@ const insertArticle = (postBody) => {
     .then(article => article[0]);
 }
 
+const deleteArticleByID = ({ article_id }) => {
+  console.log(article_id)
+  return connection("articles")
+    .where({ article_id })
+    .delete()
+    .returning()
+    .then(deletedRows => {
+      return deletedRows;
+    });
+};
+
 module.exports = {
   selectArticleByID,
   updateArticleVotesByID,
   selectArticles,
   selectarticleByID,
-  insertArticle
+  insertArticle,
+  deleteArticleByID
 };

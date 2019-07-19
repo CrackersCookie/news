@@ -48,8 +48,8 @@ const selectArticles = ({ sort_by = "created_at", order = "desc", author, topic,
       .modify(query => {
         if (author) query.where({ "articles.author": author });
         if (topic) query.where({ topic });
-        if (limit) query.limit(limit)
-        if (p) query.offset((p * limit) - limit)
+        if (limit) query.limit(limit);
+        if (p) query.offset((p * limit) - limit);
       })
       .then(articles => {
         let waitPromise; //by passing this to the Promise.all it will wait for a response before proceeding

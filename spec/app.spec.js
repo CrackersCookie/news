@@ -379,7 +379,7 @@ describe("API testing", () => {
           expect(comments).to.eql([]);
         });
     });
-    describe('', () => {
+    describe('Error handling', () => {
       it("ERROR - returns a 404 and article not found message when passed an article_id that does not exist", () => {
         return request(app)
           .get("/api/articles/9999/comments")
@@ -412,6 +412,40 @@ describe("API testing", () => {
           .expect(400)
           .then(({ body: { msg } }) => {
             expect(msg).to.equal("Invalid sort order");
+          });
+      });
+    });
+    describe.only('Pagination - limit, page and total_count', () => {
+      it('returns a 200 status taking a query - limit - which limits the number of comments served', () => {
+        return request(app)
+          .get("/api/articles/1/comments?limit=5")
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(comments.length).to.equal(5)
+          });
+      });
+      it('returns a 200 status and limits the response to 10 result by default', () => {
+        return request(app)
+          .get("/api/articles/1/comments")
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(comments.length).to.equal(10)
+          });
+      });
+      it('returns a 200 status taking a query - p - which selects the page of results by using an offset', () => {
+        return request(app)
+          .get("/api/articles/1/comments?p=2")
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(comments.length).to.equal(3)
+          });
+      });
+      it("returns a 200 status when passed a page query too large - so no artile on the page", () => {
+        return request(app)
+          .get("/api/articles/1/comments?p=9999")
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(comments).to.eql([])
           });
       });
     });

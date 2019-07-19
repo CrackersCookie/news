@@ -16,13 +16,17 @@ const insertCommentByArticleID = ({ article_id }, reqBody) => {
   }
 };
 
-const selectCommentsByArticleID = ({ article_id }, { sort_by, order = "desc" }) => {
+const selectCommentsByArticleID = ({ article_id }, { sort_by, order = "desc", limit = 10, p }) => {
   if (order === "asc" || order === "desc") {
     return connection
       .select("comment_id", "votes", "created_at", "author", "body")
       .from("comments")
       .where({ article_id })
       .orderBy(sort_by || "created_at", order)
+      .modify(query => {
+        if (limit) query.limit(limit);
+        if (p) query.offset((p * limit) - limit);
+      })
       .then(comments => {
         let commentsPresent = true;
         if (!comments.length) commentsPresent = selectarticleByID(article_id)

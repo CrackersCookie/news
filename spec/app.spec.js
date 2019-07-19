@@ -416,7 +416,7 @@ describe("API testing", () => {
       });
     });
   });
-  describe.only('GET /api/articles', () => {
+  describe('GET /api/articles', () => {
     it('returns a 200 status and an array of all the article objects with the correct keys', () => {
       return request(app)
         .get('/api/articles')
@@ -546,7 +546,7 @@ describe("API testing", () => {
         return Promise.all(methodPromises);
       });
     });
-    describe.only('Pagination - limit, page and total_count', () => {
+    describe('Pagination - limit, page and total_count', () => {
       it('returns a 200 status taking a query - limit - which limits the number of responses served', () => {
         return request(app)
           .get("/api/articles?limit=5")
@@ -596,13 +596,53 @@ describe("API testing", () => {
           expect(total_count).to.equal(11)
         });
     });
-    describe.only('Error handling - Pagination', () => {
-      it("ERROR - returns a 400 error when ordered by an invalid value", () => {
+    it("returns a 200 status when passed a page query too large - so no artile on the page", () => {
+      return request(app)
+        .get("/api/articles?p=9999")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(articles).to.eql([])
+        });
+    });
+    describe('Error handling - Pagination', () => {
+      it("ERROR - returns a 400 error when limit is passed a string", () => {
         return request(app)
           .get("/api/articles?limit=invaid-input")
           .expect(400)
           .then(({ body: { msg } }) => {
-            expect(msg).to.equal("Invalid sort order");
+            expect(msg).to.equal("Limit must be a positive number");
+          });
+      });
+      it("ERROR - returns a 400 error when limit is passed a negative number", () => {
+        return request(app)
+          .get("/api/articles?limit=-2")
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal("Limit must be a positive number");
+          });
+      });
+      it("ERROR - returns a 400 error when the page query is passed a string", () => {
+        return request(app)
+          .get("/api/articles?p=invaid-input")
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal("p must be a positive number");
+          });
+      });
+      it("ERROR - returns a 400 error when the page query is passed a negative number", () => {
+        return request(app)
+          .get("/api/articles?p=-2")
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal("p must be a positive number");
+          });
+      });
+      it("ERROR - returns a 400 error when the page query is passed 0", () => {
+        return request(app)
+          .get("/api/articles?p=0")
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal("p must be a positive number");
           });
       });
     });

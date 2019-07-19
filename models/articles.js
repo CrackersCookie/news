@@ -33,7 +33,10 @@ const updateArticleVotesByID = ({ article_id }, body) => {
   }
 };
 
+
 const selectArticles = ({ sort_by = "created_at", order = "desc", author, topic, limit = 10, p }) => {
+  if (!Number(limit) || limit < 0) return Promise.reject({ status: 400, msg: "Limit must be a positive number" })
+  if (p && !Number(p) || p && p < 0) return Promise.reject({ status: 400, msg: "p must be a positive number" })
   if (order === "asc" || order === "desc") {
     return connection
       .select("articles.author", "title", "articles.article_id", "topic", "articles.created_at", "articles.votes")

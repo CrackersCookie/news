@@ -42,7 +42,6 @@ const sendCommentsByArticleID = (req, res, next) => {
 const sendArticles = (req, res, next) => {
   selectArticles(req.query)
     .then(([articles, total_count]) => {
-      // console.log(articles)
       res.status(200).send({ articles, total_count });
     })
     .catch(next);

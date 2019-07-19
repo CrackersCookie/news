@@ -33,7 +33,7 @@ const updateArticleVotesByID = ({ article_id }, body) => {
   }
 };
 
-const selectArticles = ({ sort_by = "created_at", order = "desc", author, topic, limit = 10 }) => {
+const selectArticles = ({ sort_by = "created_at", order = "desc", author, topic, limit = 10, p }) => {
   if (order === "asc" || order === "desc") {
     return connection
       .select("articles.author", "title", "articles.article_id", "topic", "articles.created_at", "articles.votes")
@@ -46,20 +46,33 @@ const selectArticles = ({ sort_by = "created_at", order = "desc", author, topic,
         if (author) query.where({ "articles.author": author });
         if (topic) query.where({ topic });
         if (limit) query.limit(limit)
+        if (p) query.offset((p * limit) - limit)
       })
       .then(articles => {
-        let articlesPresent = true;
+        let waitPromise;
         if (!articles.length) {
-          if (author) articlesPresent = selectUserByID(author)
-          if (topic) articlesPresent = selectTopic(topic)
+          if (author) waitPromise = selectUserByID(author)
+          if (topic) waitPromise = selectTopic(topic)
         }
-        return Promise.all([articles, articlesPresent]);
+        return Promise.all([articles, waitPromise]);
+      }).then(([articles]) => {
+        const total_count = selectArticleCount();
+        return Promise.all([articles, total_count]);
       })
-      .then(([articles, articlesPresent]) => {
-        if (articlesPresent) return articles;
+      .then(([articles, total_count]) => {
+        return [articles, total_count];
       })
   } else return Promise.reject({ status: 400, msg: "Invalid sort order" });
 };
+
+const selectArticleCount = () => {
+  return connection
+    .select('article_id')
+    .from('articles')
+    .then((allArticles) => {
+      return allArticles.length;
+    })
+}
 
 const selectUserByID = (author) => {
   return connection

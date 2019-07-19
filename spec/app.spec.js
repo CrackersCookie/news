@@ -500,24 +500,6 @@ describe("API testing", () => {
           expect(articles).to.eql([])
         });
     });
-    describe('Pagination - limit, page and total_count', () => {
-      it('returns a 200 status taking a query - limit - which limits the number of responses served', () => {
-        return request(app)
-          .get("/api/articles?limit=5")
-          .expect(200)
-          .then(({ body: { articles } }) => {
-            expect(articles.length).to.equal(5)
-          });
-      });
-      it('returns a 200 status and limits the response to 10 result by default', () => {
-        return request(app)
-          .get("/api/articles")
-          .expect(200)
-          .then(({ body: { articles } }) => {
-            expect(articles.length).to.equal(10)
-          });
-      });
-    });
     describe('Error handling', () => {
       it("ERROR - returns a 400 error when sorted by an invalid column", () => {
         return request(app)
@@ -562,6 +544,40 @@ describe("API testing", () => {
             });
         });
         return Promise.all(methodPromises);
+      });
+    });
+    describe('Pagination - limit, page and total_count', () => {
+      it('returns a 200 status taking a query - limit - which limits the number of responses served', () => {
+        return request(app)
+          .get("/api/articles?limit=5")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles.length).to.equal(5)
+          });
+      });
+      it('returns a 200 status and limits the response to 10 result by default', () => {
+        return request(app)
+          .get("/api/articles")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles.length).to.equal(10)
+          });
+      });
+      it('returns a 200 status taking a query - p - which selects the page of results by using an offset', () => {
+        return request(app)
+          .get("/api/articles?p=2")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles.length).to.equal(2)
+          });
+      });
+      it('returns a 200 status and adds a total_count to the response which is the total count of articles', () => {
+        return request(app)
+          .get("/api/articles")
+          .expect(200)
+          .then(({ body: { total_count } }) => {
+            expect(total_count).to.equal(12)
+          });
       });
     });
   });

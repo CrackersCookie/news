@@ -546,7 +546,7 @@ describe("API testing", () => {
         return Promise.all(methodPromises);
       });
     });
-    describe('Pagination - limit, page and total_count', () => {
+    describe.only('Pagination - limit, page and total_count', () => {
       it('returns a 200 status taking a query - limit - which limits the number of responses served', () => {
         return request(app)
           .get("/api/articles?limit=5")
@@ -577,6 +577,32 @@ describe("API testing", () => {
           .expect(200)
           .then(({ body: { total_count } }) => {
             expect(total_count).to.equal(12)
+          });
+      });
+    });
+    it('returns a 200 status total count takes author query into account when returning the total number of articles', () => {
+      return request(app)
+        .get("/api/articles?author=butter_bridge")
+        .expect(200)
+        .then(({ body: { total_count } }) => {
+          expect(total_count).to.equal(3)
+        });
+    });
+    it('returns a 200 status total count takes topic query into account when returning the total number of articles', () => {
+      return request(app)
+        .get("/api/articles?topic=mitch")
+        .expect(200)
+        .then(({ body: { total_count } }) => {
+          expect(total_count).to.equal(11)
+        });
+    });
+    describe.only('Error handling - Pagination', () => {
+      it("ERROR - returns a 400 error when ordered by an invalid value", () => {
+        return request(app)
+          .get("/api/articles?limit=invaid-input")
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal("Invalid sort order");
           });
       });
     });

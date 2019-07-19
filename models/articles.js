@@ -49,14 +49,14 @@ const selectArticles = ({ sort_by = "created_at", order = "desc", author, topic,
         if (p) query.offset((p * limit) - limit)
       })
       .then(articles => {
-        let waitPromise;
+        let waitPromise; //by passing this to the Promise.all it will wait for a response before proceeding
         if (!articles.length) {
           if (author) waitPromise = selectUserByID(author)
           if (topic) waitPromise = selectTopic(topic)
         }
         return Promise.all([articles, waitPromise]);
       }).then(([articles]) => {
-        const total_count = selectArticleCount();
+        const total_count = selectArticleCount(author, topic);
         return Promise.all([articles, total_count]);
       })
       .then(([articles, total_count]) => {
@@ -65,10 +65,14 @@ const selectArticles = ({ sort_by = "created_at", order = "desc", author, topic,
   } else return Promise.reject({ status: 400, msg: "Invalid sort order" });
 };
 
-const selectArticleCount = () => {
+const selectArticleCount = (author, topic) => {
   return connection
     .select('article_id')
     .from('articles')
+    .modify(query => {
+      if (author) query.where({ author });
+      if (topic) query.where({ topic });
+    })
     .then((allArticles) => {
       return allArticles.length;
     })

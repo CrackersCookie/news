@@ -4,7 +4,7 @@ SELECT articles.article_id, COUNT(comments.comment_id)
 FROM articles LEFT JOIN comments ON articles.article_id = comments.article_id
 GROUP BY (articles.article_id);
 
-SELECT title FROM articles WHERE topic = 'cats';
+SELECT title FROM articles WHERE topic = 'mitch';
 
 SELECT * FROM comments;
 

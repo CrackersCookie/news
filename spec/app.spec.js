@@ -96,7 +96,7 @@ describe("API testing", () => {
     });
     describe('Error handling', () => {
       it('ERROR - gives a 405 status and "Method Not Allowed" when attempting to post or delete articles by article_id', () => {
-        const invalidMethods = ["post", "delete"];
+        const invalidMethods = ["post"];
         const methodPromises = invalidMethods.map(method => {
           return request(app)
           [method]("/api/articles/34")
@@ -1009,6 +1009,21 @@ describe("API testing", () => {
             );
           });
       });
+    });
+  });
+  describe.only("POST /api/topics", () => {
+    it("returns a status 201 when posting a new topic, returns the posted topic", () => {
+      return request(app)
+        .post("/api/topics")
+        .send({ slug: 'Marvel Movies', description: "The best movies" })
+        .expect(201)
+        .then(({ body: { topic } }) => {
+          expect(topic).to.have.keys(
+            "slug",
+            "description"
+          );
+          expect(topic.slug).to.equal('Marvel Movies');
+        });
     });
   });
   describe("ERROR/not-a-route", () => {

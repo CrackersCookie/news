@@ -4,4 +4,12 @@ const selectTopics = () => {
   return connection.select("*").from("topics");
 };
 
-module.exports = { selectTopics };
+const insertTopic = (postBody) => {
+  return connection
+    .insert(postBody)
+    .into("topics")
+    .returning("*")
+    .then(article => article[0]);
+}
+
+module.exports = { selectTopics, insertTopic };

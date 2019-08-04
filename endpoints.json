@@ -14,6 +14,21 @@
       ]
     }
   },
+  "POST /api/topics": {
+    "description": "Adds a new topic and serves up the added topic",
+    "RequestBody": {
+      "slug": "football",
+      "description": "Footie!"
+    },
+    "exampleResponse": {
+      "articles": [
+        {
+          "slug": "football",
+          "description": "Footie!"
+        }
+      ]
+    }
+  },
   "GET /api/articles": {
     "description": "serves an array of all topics",
     "queries": [
@@ -22,6 +37,27 @@
       "sort_by",
       "order"
     ],
+    "exampleResponse": {
+      "articles": [
+        {
+          "title": "Seafood substitutions are increasing",
+          "topic": "cooking",
+          "author": "weegembump",
+          "body": "Text from the article..",
+          "created_at": 1527695953341
+        }
+      ],
+      "total_count": 4
+    }
+  },
+  "POST /api/articles": {
+    "description": "Adds a new article and serves up the added article",
+    "RequestBody": {
+      "title": "Test Title",
+      "author": "butter_bridge",
+      "body": "article text goes here",
+      "topic": "cats"
+    },
     "exampleResponse": {
       "articles": [
         {
@@ -42,6 +78,40 @@
         "avatar_url": "https://www.spiritsurfers.net/monastery/wp-content/uploads/_41500270_mrtickle.jpg",
         "name": "Tom Tickle"
       }
+    }
+  },
+  "GET /api/users/": {
+    "description": "serves an array of users",
+    "exampleResponse": {
+      "users": [
+        {
+          "username": "tickle122",
+          "avatar_url": "https://www.spiritsurfers.net/monastery/wp-content/uploads/_41500270_mrtickle.jpg",
+          "name": "Tom Tickle"
+        },
+        {
+          "username": "tickle123",
+          "avatar_url": "https://www.spiritsurfers.net/monastery/wp-content/uploads/_41500270_mrtickle.jpg",
+          "name": "Tom Tickles"
+        }
+      ]
+    }
+  },
+  "POST /api/users": {
+    "description": "Adds a new user and serves up the added user",
+    "RequestBody": {
+      "username": "tickle122",
+      "avatar_url": "https://www.spiritsurfers.net/monastery/wp-content/uploads/_41500270_mrtickle.jpg",
+      "name": "Tom Tickle"
+    },
+    "exampleResponse": {
+      "user": [
+        {
+          "username": "tickle122",
+          "avatar_url": "https://www.spiritsurfers.net/monastery/wp-content/uploads/_41500270_mrtickle.jpg",
+          "name": "Tom Tickle"
+        }
+      ]
     }
   },
   "GET /api/articles/:article_id": {
@@ -75,6 +145,9 @@
         "created_at": "2016-08-18T12:07:52.389Z"
       }
     }
+  },
+  "DELETE /api/articles/:article_id": {
+    "description": "deletes an article by ID"
   },
   "POST /api/articles/:article_id/comments": {
     "description": "adds a new comment to a specified article and serves up the comment in an object as a response",

@@ -1011,7 +1011,7 @@ describe("API testing", () => {
       });
     });
   });
-  describe.only("POST /api/topics", () => {
+  describe("POST /api/topics", () => {
     it("returns a status 201 when posting a new topic, returns the posted topic", () => {
       return request(app)
         .post("/api/topics")
@@ -1072,14 +1072,88 @@ describe("API testing", () => {
       });
     });
   });
-  describe("ERROR/not-a-route", () => {
-    it('gives a 404 erorr and "Route Not Found" when using a route that does not exist', () => {
+  describe("POST /api/users", () => {
+    it("returns a status 201 when posting a new user, returns the posted topic", () => {
       return request(app)
-        .get("/api/not-a-route")
-        .expect(404)
-        .then(({ body: { msg } }) => {
-          expect(msg).to.equal("Route Not Found");
+        .post("/api/users")
+        .send({ username: 'Iron Man', avatar_url: "https://avatars2.githubusercontent.com", name: "Iron" })
+        .expect(201)
+        .then(({ body: { user } }) => {
+          expect(user).to.have.keys(
+            "username",
+            "avatar_url",
+            "name"
+          );
+          expect(user.username).to.equal('Iron Man');
         });
+    });
+    it("returns a status 201 when avatar_url is missing but adds a default image to the user", () => {
+      return request(app)
+        .post("/api/users")
+        .send({ username: 'Iron Man', name: "Iron" })
+        .expect(201)
+        .then(({ body: { user } }) => {
+          expect(user.avatar_url).to.equal('https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png');
+        });
+    });
+    describe('Error handling', () => {
+      it("ERROR - returns a status 400 if username not supplied", () => {
+        return request(app)
+          .post("/api/users/")
+          .send({ avatar_url: "https://avatars2.githubusercontent.com", name: "Iron" })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal(
+              'null value in column "username" violates not-null constraint'
+            );
+          });
+      });
+      it("ERROR - returns a status 400 if name not supplied", () => {
+        return request(app)
+          .post("/api/users/")
+          .send({ username: 'Iron Man', avatar_url: "https://avatars2.githubusercontent.com" })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal(
+              'null value in column "name" violates not-null constraint'
+            );
+          });
+      });
+      it("ERROR - returns a status 400 when an existing user is posted", () => {
+        return request(app)
+          .post("/api/users/")
+          .send({ username: 'butter_bridge', avatar_url: "https://avatars2.githubusercontent.com", name: "Iron" })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal(
+              'duplicate key value violates unique constraint "users_pkey"'
+            );
+          });
+      });
+    });
+  });
+  describe("GET/api/users", () => {
+    it('returns a status 200 and an object which should have a key of "users" and the data in an array', () => {
+      return request(app)
+        .get("/api/users")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.users[0]).to.have.keys("username", "name", "avatar_url");
+        });
+    });
+    describe('Error handling', () => {
+      it('ERROR - gives a 405 status and "Method Not Allowed" when attempting to post, patch or delete users', () => {
+        const invalidMethods = ["patch", "put", "delete"];
+        const methodPromises = invalidMethods.map(method => {
+          return request(app)
+          [method]("/api/users")
+            .expect(405)
+            .then(({ body: { msg } }) => {
+              expect(msg).to.equal("Method Not Allowed");
+            });
+        });
+        return Promise.all(methodPromises);
+      });
     });
   });
 });

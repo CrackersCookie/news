@@ -9,7 +9,7 @@ const insertTopic = (postBody) => {
     .insert(postBody)
     .into("topics")
     .returning("*")
-    .then(article => article[0]);
+    .then(topic => topic[0]);
 }
 
 module.exports = { selectTopics, insertTopic };

@@ -2,8 +2,10 @@ const express = require("express");
 const app = express();
 const apiRouter = require("./routes/apiRouter.js");
 const { routeNotFound, customErrors, sqlErrors, InternalErrors } = require("./errors/errors.js");
-app.use(express.json());
+const cors = require('cors');
 
+app.use(cors());
+app.use(express.json());
 app.use("/api", apiRouter);
 
 // Error handling...

@@ -63,7 +63,6 @@ const deletecommentByID = ({ comment_id }) => {
   return connection("comments")
     .where({ comment_id })
     .delete()
-    .returning()
     .then(deletedRows => {
       if (!deletedRows) return Promise.reject({ status: 404, msg: "Comment Not Found" });
       return deletedRows;

@@ -126,7 +126,6 @@ const deleteArticleByID = ({ article_id }) => {
   return connection("articles")
     .where({ article_id })
     .delete()
-    .returning()
     .then(deletedRows => {
       if (!deletedRows) return Promise.reject({ status: 404, msg: "Article Not Found" });
       return deletedRows;

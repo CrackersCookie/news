@@ -13,13 +13,16 @@ const selectUserByID = ({ username }) => {
 };
 
 const insertUser = ({
-  username, name, avatar_url = 'https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png' }) => {
+  username,
+  name,
+  avatar_url = "http://icons.iconarchive.com/icons/fasticon/cat/256/Cat-Black-icon.png"
+}) => {
   return connection
     .insert({ username, name, avatar_url })
     .into("users")
     .returning("*")
     .then(user => user[0]);
-}
+};
 
 const selectUsers = () => {
   return connection.select("*").from("users");
